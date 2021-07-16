@@ -112,8 +112,12 @@ void SysTick_Handler(void)
 //当使用OS的时候,此函数会初始化OS的时钟节拍
 //SYSTICK的时钟固定为AHB时钟的1/8
 //SYSCLK:系统时钟频率
-void delay_init(u8 SYSCLK)
+void delay_init(void)
 {
+	/********************************************************************/
+	u8 SYSCLK = 168; //段然加的，有问题到这来找
+	/********************************************************************/
+	
 #if SYSTEM_SUPPORT_OS 						//如果需要支持OS.
 	u32 reload;
 #endif
