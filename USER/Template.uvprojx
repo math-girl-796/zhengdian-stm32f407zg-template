@@ -110,11 +110,11 @@
         <DllOption>
           <SimDllName>SARMCM3.DLL</SimDllName>
           <SimDllArguments> -REMAP -MPU</SimDllArguments>
-          <SimDlgDll>DCM.DLL</SimDlgDll>
-          <SimDlgDllArguments>-pCM4</SimDlgDllArguments>
+          <SimDlgDll>DARMSTM.DLL</SimDlgDll>
+          <SimDlgDllArguments>-pSTM32F407ZG</SimDlgDllArguments>
           <TargetDllName>SARMCM3.DLL</TargetDllName>
           <TargetDllArguments> -MPU</TargetDllArguments>
-          <TargetDlgDll>TCM.DLL</TargetDlgDll>
+          <TargetDlgDll>DCM.DLL</TargetDlgDll>
           <TargetDlgDllArguments>-pCM4</TargetDlgDllArguments>
         </DllOption>
         <DebugOption>
@@ -335,7 +335,7 @@
               <MiscControls></MiscControls>
               <Define>STM32F40_41xxx,USE_STDPERIPH_DRIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>..\CORE;..\SYSTEM\delay;..\SYSTEM\sys;..\SYSTEM\usart;..\USER;..\FWLIB\inc;..\HARDWARE\led;..\HARDWARE\step_motor;..\HARDWARE\key</IncludePath>
+              <IncludePath>..\CORE;..\SYSTEM\delay;..\SYSTEM\sys;..\SYSTEM\usart;..\USER;..\FWLIB\inc;..\HARDWARE\led;..\HARDWARE\step_motor;..\HARDWARE\key;..\HARDWARE\pwm;..\HARDWARE\rocker;..\HARDWARE\steer</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -633,6 +633,21 @@
               <FileName>key.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\HARDWARE\key\key.c</FilePath>
+            </File>
+            <File>
+              <FileName>pwm.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\HARDWARE\pwm\pwm.c</FilePath>
+            </File>
+            <File>
+              <FileName>rocker.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\HARDWARE\rocker\rocker.c</FilePath>
+            </File>
+            <File>
+              <FileName>steer.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\HARDWARE\steer\steer.c</FilePath>
             </File>
           </Files>
         </Group>

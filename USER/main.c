@@ -5,6 +5,8 @@
 #include "led.h"
 #include "key.h"
 #include "stepper_motor.h"
+#include "pwm.h"
+#include "steer.h"
 
 void test_uart1(void);
 void test_uart2(void);
@@ -15,10 +17,101 @@ void test_uart6(void);
 void test_led(void);
 void test_key(void); //uart1连接电脑，通过XCOM查看验证
 void test_stepper_motor(void);
+void test_pwm(void);
+void test_pwm_and_uart1(void);
+void test_steer1_and_uart1(void); // 舵机
 
 int main(void)
 {	
-	test_uart6();
+	test_steer1_and_uart1();
+}
+
+void test_steer1_and_uart1(void) //使用前先配置TIM14_CH1_PWM管脚为PA7.电脑会不停地收到hello。电脑给f4发0-20000的int型数据（两个字节），会改变pwm占空比，其他范围数据可能会导致出错
+	//有效范围为500-2000，表示0°-180°
+{
+	int light_level = 1500;
+	int temp_light_level;
+	u8 buf[4];
+	u8 hello_count = 0;
+	led_init();
+	delay_init();
+	uart1_init(115200);
+	
+	steer1_init();
+	
+	while(1)
+	{
+		
+		int len = uart1_buf_status();
+		if (len == 4)
+		{
+			uart1_read_buf(buf, 4);
+			temp_light_level = (buf[3] << 24) + (buf[2] << 16) + (buf[1] << 8) + buf[0];
+			light_level = temp_light_level;
+			printf("------------> SET HIGH VOLTAGE us in a cycle: %d\r\n", light_level);
+		}
+		else
+		{
+			uart1_clear_buf();
+		}
+		steer1_set_compare(light_level);
+		delay_ms(100);
+		hello_count++;
+		if (hello_count == 10)
+		{
+			printf("hello\r\n");
+			hello_count = 0;
+		}
+	}
+}
+
+void test_pwm_and_uart1(void) //使用前先配置TIM14_CH1_PWM管脚为PF9.电脑会不停地收到hello。电脑给f4发0-500的short型数据（两个字节），会改变led亮度，其他范围数据可能会导致出错
+{
+	int light_level = 150;
+	int temp_light_level;
+	u8 buf[2];
+	led_init();
+	delay_init();
+	uart1_init(115200);
+	TIM14_CH1_PWM_Init_us(500);
+	
+	while(1)
+	{
+		int len = uart1_buf_status();
+		if (len == 4)
+		{
+			uart1_read_buf(buf, 2);
+			temp_light_level = (buf[1] << 8) + buf[0];
+			light_level = temp_light_level;
+			printf("------------> SET HIGH VOLTAGE us in a cycle: %d\r\n", light_level);
+		}
+		TIM14_CH1_PWM_Set_Compare(light_level);
+		delay_ms(100);
+		printf("hello\r\n");
+	}
+}
+
+
+void test_pwm(void) // 使用前先配置TIM14_CH1_PWM管脚为PF9，看led灯
+{
+	int light_level;
+	led_init();
+	delay_init();
+	uart1_init(115200);
+	TIM14_CH1_PWM_Init_us(500);
+	while(1)
+	{
+		for(light_level = 300; light_level < 500; light_level++)
+		{
+			TIM14_CH1_PWM_Set_Compare(light_level);
+			delay_ms(5);
+		}
+		for(light_level = 500; light_level > 300; light_level--)
+		{
+			TIM14_CH1_PWM_Set_Compare(light_level);
+			delay_ms(5);
+		}
+	}
 }
 
 
