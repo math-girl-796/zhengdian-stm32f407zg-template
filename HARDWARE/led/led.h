@@ -37,4 +37,14 @@ void led_switch(uint8_t led);
 //如果输入不合法：返回值不确定
 uint8_t led_state(uint8_t led);
 
+
+
+// 一些led闪烁模式，详见函数定义。并不是设置闪烁模式，而是通过delay实现。
+void led_blink1(uint8_t LEDx);
+void led_blink2(uint8_t LEDx);
+void led_blink3(uint8_t LEDx);
+void led_blink4(uint8_t LEDx);
+void led_blink5(uint8_t LEDx);
+
+
 #endif

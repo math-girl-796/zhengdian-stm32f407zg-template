@@ -21,7 +21,8 @@ void test_uart6(void);
 void test_led(void);
 void test_key(void); //uart1¡¨Ω”µÁƒ‘£¨Õ®π˝XCOM≤Èø¥—È÷§
 void test_stepper_motor(void);
-void test_pwm(void);
+void test_pwm_TIM13_CH1(void);
+void test_pwm_TIM14_CH1(void);
 void test_pwm_and_uart1(void);
 void test_steer1_and_uart1(void); // ∂Êª˙
 void test_pid_camera_and_steer1(void);
@@ -32,7 +33,30 @@ void test_rocker(void);
 
 int main(void)
 {	
-	test_rocker();
+	test_pwm_TIM13_CH1();
+}
+
+
+void test_pwm_TIM13_CH1(void)
+{
+	int light_level;
+	led_init();
+	delay_init();
+	uart1_init(115200);
+	TIM13_CH1_PWM_Init_us(200);
+	while(1)
+	{
+		for(light_level = 0; light_level < 200; light_level++)
+		{
+			TIM13_CH1_PWM_Set_Compare(light_level);
+			delay_ms(5);
+		}
+		for(light_level = 200; light_level > 0; light_level--)
+		{
+			TIM13_CH1_PWM_Set_Compare(light_level);
+			delay_ms(5);
+		}
+	}
 }
 
 //◊¢“‚“°∏ÀµÁ‘¥¡¨Ω”3v3£¨∆‰À˚π‹Ω≈ø¥rocker.c
@@ -320,7 +344,7 @@ void test_pwm_and_uart1(void) // π”√«∞œ»≈‰÷√TIM14_CH1_PWMπ‹Ω≈Œ™PF9.µÁƒ‘ª·≤ªÕ£µÿ 
 }
 
 
-void test_pwm(void) //  π”√«∞œ»≈‰÷√TIM14_CH1_PWMπ‹Ω≈Œ™PF9£¨ø¥ledµ∆
+void test_pwm_TIM14_CH1(void) //  π”√«∞œ»≈‰÷√TIM14_CH1_PWMπ‹Ω≈Œ™PF9£¨ø¥ledµ∆
 {
 	int light_level;
 	led_init();
