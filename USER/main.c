@@ -7,6 +7,7 @@
 #include "stepper_motor.h"
 #include "pwm.h"
 #include "steer.h"
+#include "utils.h"
 
 void test_uart1(void);
 void test_uart2(void);
@@ -20,14 +21,154 @@ void test_stepper_motor(void);
 void test_pwm(void);
 void test_pwm_and_uart1(void);
 void test_steer1_and_uart1(void); // 舵机
+void test_pid_camera_and_steer1(void);
+void test_parse_bytes_and_uart1(void);
 
 int main(void)
 {	
-	test_steer1_and_uart1();
+	test_parse_bytes_and_uart1();
+}
+
+
+// 测试用例
+//1		len: 1	num.i: 1	num.f: 1.000000	
+//1.1	len: 3	num.i: 1	num.f: 1.100000	
+//1.5	len: 3	num.i: 2	num.f: 1.500000	
+//-1	len: 2	num.i: -1	num.f: -1.000000	
+//-1.1	len: 4	num.i: -1	num.f: -1.100000	
+//-1.5	len: 4	num.i: -2	num.f: -1.500000	
+//999999999999999	len: 15	num.i: 2147483647	num.f: 999999986991104.000000	
+//99999999999999999999999999999999999999999999999999	len: 50	num.i: 2147483647	num.f: inf	
+//-999999999999999	len: 16	num.i: -2147483648	num.f: -999999986991104.000000	
+//999999999999999999999999999999999999999999999999999999	len: 55	num.i: -2147483648	num.f: -inf	
+void test_parse_bytes_and_uart1(void)
+{
+	uart1_init(115200);
+	
+	while(1)
+	{
+		int len = uart1_buf_status();
+		number num;
+		if (len != 0)
+		{
+			printf("len: %d\t", len);
+			u8 buf[200];
+			uart1_read_buf(buf, len);
+			buf[len] = 0; // 这条语句非常关键；这条语句也可以改成《清空buf》
+			
+			num = parse_string((char*) buf);
+			printf("num.i: %d\tnum.f: %f\t\r\n",num.i, num.f);
+		}
+	}
+	
+}
+
+
+// steer1连接9g舵机，k210pin15连接本机uart2发送口，k210所烧文件见TEST文件夹
+void test_pid_camera_and_steer1(void)
+{
+	int target_x = 160;  
+	int extern_x; // 0 - 320
+	int pwmv = 1500; // 500 - 2500
+	
+	int error, derror, ierror;
+	int error_last = 0;
+	float kp = 0.1, kd = -1, ki = 0;
+	
+	int dia;
+	
+	u8 buf[2];
+	led_init();
+	delay_init();
+	uart1_init(115200);
+	uart2_init(115200);
+	
+	steer1_init();
+	steer1_set_compare(1500);
+	
+	while(1)
+	{
+		int len1 = uart1_buf_status();
+		int len2 = uart2_buf_status();
+		if (len2 == 2)
+		{
+			//读取摄像头数据
+			uart2_read_buf(buf, 2);
+			extern_x = (buf[1] << 8) + buf[0];
+			printf("extern_x: %d\t", extern_x);
+			
+			//更新误差值
+			error = target_x - extern_x;
+			derror = error - error_last;
+			ierror = ierror + error;
+			error_last = error;
+			printf("error: %d\t", error);
+			
+			//修剪ierror防止它太大
+			if (ierror > 3000) ierror = 3000;
+			if (ierror < -3000) ierror = -3000;
+			
+			//计算提供给pwm的Compare的更新差值
+			dia = (int) (kp * error + kd * derror + ki * ierror);
+			printf("dia: %d\t", dia);
+			
+			//更新pwmv值
+			pwmv += dia;
+			
+			//修剪pwmv值防止它超出范围
+			if (pwmv > 2500) pwmv = 2500;
+			if (pwmv < 500) pwmv = 500;
+			printf("new_pwmv:%d\t", pwmv);
+			
+			//设置舵机新位置
+			steer1_set_compare(pwmv);
+			printf("\r\n");
+		}
+		if (len1 == 3)
+		{
+			//读取摄像头数据
+			uart2_read_buf(buf, 2);
+			extern_x = (buf[1] << 8) + buf[0];
+			printf("extern_x: %d\t", extern_x);
+			
+			//更新误差值
+			error = target_x - extern_x;
+			derror = error - error_last;
+			ierror = ierror + error;
+			error_last = error;
+			printf("error: %d\t", error);
+			
+			//修剪ierror防止它太大
+			if (ierror > 3000) ierror = 3000;
+			if (ierror < -3000) ierror = -3000;
+			
+			//计算提供给pwm的Compare的更新差值
+			dia = (int) (kp * error + kd * derror + ki * ierror);
+			printf("dia: %d\t", dia);
+			
+			//更新pwmv值
+			pwmv += dia;
+			
+			//修剪pwmv值防止它超出范围
+			if (pwmv > 2500) pwmv = 2500;
+			if (pwmv < 500) pwmv = 500;
+			printf("new_pwmv:%d\t", pwmv);
+			
+			//设置舵机新位置
+			steer1_set_compare(pwmv);
+			printf("\r\n");
+		}
+		else
+		{
+//			printf("format error\r\n");
+			uart2_clear_buf();
+		}
+		delay_ms(10);
+	}
 }
 
 void test_steer1_and_uart1(void) //使用前先配置TIM14_CH1_PWM管脚为PA7.电脑会不停地收到hello。电脑给f4发0-20000的int型数据（两个字节），会改变pwm占空比，其他范围数据可能会导致出错
-	//有效范围为500-2000，表示0°-180°
+	//有效范围为500-2500，表示0°-180°
 {
 	int light_level = 1500;
 	int temp_light_level;
@@ -41,7 +182,6 @@ void test_steer1_and_uart1(void) //使用前先配置TIM14_CH1_PWM管脚为PA7.电脑会不停
 	
 	while(1)
 	{
-		
 		int len = uart1_buf_status();
 		if (len == 4)
 		{
@@ -49,12 +189,12 @@ void test_steer1_and_uart1(void) //使用前先配置TIM14_CH1_PWM管脚为PA7.电脑会不停
 			temp_light_level = (buf[3] << 24) + (buf[2] << 16) + (buf[1] << 8) + buf[0];
 			light_level = temp_light_level;
 			printf("------------> SET HIGH VOLTAGE us in a cycle: %d\r\n", light_level);
+			steer1_set_compare(light_level);
 		}
 		else
 		{
 			uart1_clear_buf();
 		}
-		steer1_set_compare(light_level);
 		delay_ms(100);
 		hello_count++;
 		if (hello_count == 10)
