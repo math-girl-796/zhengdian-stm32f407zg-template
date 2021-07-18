@@ -8,6 +8,9 @@
 #include "pwm.h"
 #include "steer.h"
 #include "utils.h"
+#include "lcd.h"
+#include "touch.h"
+#include "rocker.h"
 
 void test_uart1(void);
 void test_uart2(void);
@@ -23,10 +26,95 @@ void test_pwm_and_uart1(void);
 void test_steer1_and_uart1(void); // 舵机
 void test_pid_camera_and_steer1(void);
 void test_parse_bytes_and_uart1(void);
+void test_lcd_show(void);
+void test_lcd_touch_screen(void);
+void test_rocker(void);
 
 int main(void)
 {	
-	test_parse_bytes_and_uart1();
+	test_rocker();
+}
+
+//注意摇杆电源连接3v3，其他管脚看rocker.c
+void test_rocker(void)
+{
+	int16_t adcx1 = 0;
+	int16_t adcx2 = 0;
+	u8 key = 0;
+	
+	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2); //设置NVIC中断分组2:2位抢占优先级，2位响应优先级
+	
+	delay_init();	    	 //延时函数初始化	  
+	uart1_init(115200);	 //串口初始化为115200
+ 	led_init();			     //LED端口初始化
+ 	
+ 	rocker_init();		  		//ADC初始化
+	
+	while(1)
+	{
+		
+		adcx1=rocker_x();
+		adcx2=rocker_y();
+		key=rocker_sw();
+		
+		
+		printf("x:%d\ty:%d\tkey:%d\r\n", adcx1, adcx2, key);
+		
+		led_switch(LED0);
+		delay_ms(500);	
+	}
+}
+
+
+void test_lcd_touch_screen(void)
+{
+	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
+	delay_init();
+	
+	led_init();
+	LCD_Init();
+	key_init();
+	
+	tp_dev.init();				//触摸屏初始化
+	POINT_COLOR=RED;
+	
+	LCD_ShowString(0,0,200,16,16,(u8*)"fuck");
+	
+	while(1)
+	{
+		tp_dev.scan(0); //扫描触摸屏.0,屏幕扫描;1,物理坐标;	 
+		if (key0_state() == 1) // 按按键0进入校准，并且点亮LED0，校准完成关闭LED0
+		{
+			led_on(LED0);
+			LCD_Clear(WHITE);	//清屏
+		    TP_Adjust();  		//屏幕校准 
+			TP_Save_Adjdata();	//保存校准结果
+			led_off(LED0);		
+		}
+		if (tp_dev.sta & TP_PRES_DOWN) // 点屏幕上半LED11亮，下半灭
+		{
+			if(tp_dev.y[0] < lcddev.height / 2) led_on(LED1);
+			if(tp_dev.y[0] > lcddev.height / 2) led_off(LED1);
+			delay_ms(10); // 防抖
+		}
+	}
+}
+
+void test_lcd_show(void)
+{
+	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);//设置系统中断优先级分组2
+	delay_init();      //初始化延时函数
+	
+	led_init();					  //初始化LED
+ 	LCD_Init();           //初始化LCD FSMC接口
+	POINT_COLOR=RED;      //画笔颜色：红色
+	LCD_ShowString(0,0,200,16,16,(u8*)"fuck");
+	LCD_ShowString(0,16,200,16,16,(u8*)"your");		//显示LCD ID	      					 
+	LCD_ShowString(0,32,200,16,16,(u8*)"mother");	
+	LCD_ShowxNum(0,48,123456,9,16,(1 << 7) + 1); // 叠加测试
+	LCD_ShowxNum(0,48,654321,9,16,(1 << 7) + 1); // 叠加测试
+	LCD_ShowxNum(0,64,123456,9,16,(1 << 7) + 0); // 叠加测试
+	LCD_ShowxNum(0,64,654321,9,16,(1 << 7) + 0); // 非叠加测试
 }
 
 
