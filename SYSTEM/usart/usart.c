@@ -41,7 +41,8 @@ u8 USART1_RX_BUF[USART1_REC_LEN];     //接收缓冲,最大USART_REC_LEN个字节.
 //bit15，	接收完成标志
 //bit14，	接收到0x0d
 //bit13~0，	接收到的有效字节数目
-u16 USART1_RX_STA=0;       //接收状态标记	
+u16 USART1_RX_STA;       //接收状态标记	
+
 
 int uart1_buf_status(void)
 {
