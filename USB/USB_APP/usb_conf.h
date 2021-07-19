@@ -28,10 +28,7 @@
 /* Define to prevent recursive inclusion -------------------------------------*/
 #ifndef __USB_CONF__H__
 #define __USB_CONF__H__
-
-/* Includes ------------------------------------------------------------------*/ 
 #include "stm32f4xx.h"
-
 
 /** @addtogroup USB_OTG_DRIVER
   * @{
@@ -61,8 +58,8 @@
  //#define USE_USB_OTG_FS
 #endif /* USE_USB_OTG_FS */
 
-#ifdef USE_USB_OTG_FS 
- #define USB_OTG_FS_CORE
+#ifdef USE_USB_OTG_HS 
+// #define USB_OTG_HS_CORE
 #endif
 
 /****************** USB OTG HS PHY CONFIGURATION *******************************
@@ -98,6 +95,9 @@
  #define USB_OTG_HS_CORE
 #endif
 
+#ifdef USE_USB_OTG_FS 
+ #define USB_OTG_FS_CORE
+#endif
 /*******************************************************************************
 *                     FIFO Size Configuration in Host mode
 *  
@@ -116,7 +116,7 @@
 *        then the space must be at least two times the maximum packet size for 
 *        that channel.
 *******************************************************************************/
- 
+
 /****************** USB OTG HS CONFIGURATION **********************************/
 #ifdef USB_OTG_HS_CORE
  #define RX_FIFO_HS_SIZE                          512
@@ -126,6 +126,9 @@
 // #define USB_OTG_HS_LOW_PWR_MGMT_SUPPORT
 // #define USB_OTG_HS_SOF_OUTPUT_ENABLED
 
+// #define USB_OTG_INTERNAL_VBUS_ENABLED
+#define USB_OTG_EXTERNAL_VBUS_ENABLED
+
  #ifdef USE_ULPI_PHY
   #define USB_OTG_ULPI_PHY_ENABLED
  #endif
@@ -133,8 +136,7 @@
    #define USB_OTG_EMBEDDED_PHY_ENABLED
  #endif
  #define USB_OTG_HS_INTERNAL_DMA_ENABLED
- #define USB_OTG_EXTERNAL_VBUS_ENABLED
-// #define USB_OTG_INTERNAL_VBUS_ENABLED
+// #define USB_OTG_HS_DEDICATED_EP1_ENABLED
 #endif
 
 /****************** USB OTG FS CONFIGURATION **********************************/

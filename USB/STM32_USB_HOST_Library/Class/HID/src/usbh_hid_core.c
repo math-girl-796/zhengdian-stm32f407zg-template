@@ -348,7 +348,7 @@ static USBH_Status USBH_HID_ClassRequest(USB_OTG_CORE_HANDLE *pdev ,
     
   case HID_REQ_SET_IDLE:
     
-    classReqStatus = USBH_Set_Idle (pdev, pphost, 0, 0);
+    classReqStatus = USBH_Set_Idle (pdev, pphost, 100, 0);//这里duration官方设置的是0,修改为100,提高兼容性	 
     
     /* set Idle */
     if (classReqStatus == USBH_OK)
@@ -421,7 +421,7 @@ static USBH_Status USBH_HID_Handle(USB_OTG_CORE_HANDLE *pdev ,
     HID_Machine.timer = HCD_GetCurrentFrame(pdev);
     break;
     
-  case HID_POLL:
+  case HID_POLL: 
     if(( HCD_GetCurrentFrame(pdev) - HID_Machine.timer) >= HID_Machine.poll)
     {
       HID_Machine.state = HID_GET_DATA;
@@ -539,7 +539,7 @@ static USBH_Status USBH_Set_Idle (USB_OTG_CORE_HANDLE *pdev,
   phost->Control.setup.b.wValue.w = (duration << 8 ) | reportId;
   
   phost->Control.setup.b.wIndex.w = 0;
-  phost->Control.setup.b.wLength.w = 0;
+  phost->Control.setup.b.wLength.w = 100;	//官方的这里设置的是0,导致部分鼠标无法识别,这里修改为100以后,识别率明显提高.
   
   return USBH_CtlReq(pdev, phost, 0 , 0 );
 }

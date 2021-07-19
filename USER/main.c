@@ -14,16 +14,12 @@
 #include "usb_conf.h" 
 #include "malloc.h" 
 #include "w25qxx.h"    
-#include "sdio_sdcard.h" 
+#include "sdio_sdcard.h"
 #include "ff.h"  
-#include "exfuns.h"    
-#include "fontupd.h"
-#include "text.h"	
-#include "piclib.h"	 
-#include "usbh_usr.h"
+#include "exfuns.h"
 #include "usmart.h"
-
-#define USBH_USR_OTG_FS_IRQH
+#include "sram.h"  
+#include "keyboard.h"
 
 void test_uart1(void);
 void test_uart2(void);
@@ -43,92 +39,300 @@ void test_parse_bytes_and_uart1(void);
 void test_lcd_show(void);
 void test_lcd_touch_screen(void);
 void test_rocker(void);
-//void test_usb_slave(void);
-void test_usb_host(void);
+///////////////////////////////
+//这三个实验需要大量库文件的代码改动，不能共存。这里只保留有用的键盘测试
+//void test_usb_slave(void);//单片机用作读卡器
+//void test_usb_host(void);//单片机读取存储设备里的文件
+void test_keyboard(void);
+///////////////////////////////
+void test_fatfs(void);
 
 int main(void)
 {	
-	test_usb_host();
+	test_fatfs();
 }
 
+void test_fatfs(void)
+{
+	 u32 total,free;
+	u8 t=0;	
+	u8 res=0;	
 
-//test_usb_host
-//插好otg，在USB_APP/usb_conf.h中173行左右三条语句中解开define USE_HOST_MODE的注释，将另两条注释掉
-USBH_HOST  USB_Host;
-USB_OTG_CORE_HANDLE  USB_OTG_Core;
-//用户测试主程序
-//返回值:0,正常
-//       1,有问题
-u8 USH_User_App(void)
-{ 
-	u32 total,free;
-	u8 res=0;
-	Show_Str(30,140,200,16,"设备连接成功!.",16,0);	 
-	res=exf_getfree("2:",&total,&free);
-	if(res==0)
-	{
-		POINT_COLOR=BLUE;//设置字体为蓝色	   
-		LCD_ShowString(30,160,200,16,16,"FATFS OK!");	
-		LCD_ShowString(30,180,200,16,16,"U Disk Total Size:     MB");	 
-		LCD_ShowString(30,200,200,16,16,"U Disk  Free Size:     MB"); 	    
-		LCD_ShowNum(174,180,total>>10,5,16); //显示U盘总容量 MB
-		LCD_ShowNum(174,200,free>>10,5,16);	
-	} 
- 
-	while(HCD_IsDeviceConnected(&USB_OTG_Core))//设备连接成功
-	{	
-		led_switch(LED0);
-		delay_ms(200);
-	}
-	POINT_COLOR=RED;//设置字体为红色	   
-	Show_Str(30,140,200,16,"设备连接中...",16,0);
-	LCD_Fill(30,160,239,220,WHITE);
-	return res;
-} 
-void test_usb_host(void)
-{        
-	u8 t;
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);//设置系统中断优先级分组2
 	delay_init();  //初始化延时函数
 	uart1_init(115200);		//初始化串口波特率为115200
-	led_init();				//初始化与LED连接的硬件接口
-	key_init();				//按键
-  	LCD_Init();				//初始化LCD 
-	W25QXX_Init();			//SPI FLASH初始化
-	usmart_dev.init(84); 	//初始化USMART	 
-	my_mem_init(SRAMIN);	//初始化内部内存池	
- 	exfuns_init();			//为fatfs相关变量申请内存 
-	piclib_init();			//初始化画图
-  	f_mount(fs[0],"0:",1); 	//挂载SD卡  
-  	f_mount(fs[1],"1:",1); 	//挂载SD卡  
-  	f_mount(fs[2],"2:",1); 	//挂载U盘
-	POINT_COLOR=RED;      
- 	while(font_init()) 				//检查字库
-	{	    
-		LCD_ShowString(60,50,200,16,16,"Font Error!");
-		delay_ms(200);				  
-		LCD_Fill(60,50,240,66,WHITE);//清除显示	     
-		delay_ms(200);				  
+	led_init();					//初始化LED 
+	usmart_dev.init(84);		//初始化USMART
+ 	lcd_init();					//LCD初始化  
+ 	key_init();					//按键初始化 
+	W25QXX_Init();				//初始化W25Q128
+	my_mem_init(SRAMIN);		//初始化内部内存池 
+	my_mem_init(SRAMCCM);		//初始化CCM内存池
+ 	POINT_COLOR=RED;//设置字体为红色 
+	LCD_ShowString(30,50,200,16,16,"Explorer STM32F4");	
+	LCD_ShowString(30,70,200,16,16,"FATFS TEST");	
+	LCD_ShowString(30,90,200,16,16,"ATOM@ALIENTEK");
+	LCD_ShowString(30,110,200,16,16,"2014/5/15");   
+	LCD_ShowString(30,130,200,16,16,"Use USMART for test");	   
+ 	while(SD_Init())//检测不到SD卡
+	{
+		LCD_ShowString(30,150,200,16,16,"SD Card Error!");
+		delay_ms(500);					
+		LCD_ShowString(30,150,200,16,16,"Please Check! ");
+		delay_ms(500);
+		led_switch(LED0);//DS0闪烁
 	}
-	Show_Str(30,50,200,16,"探索者STM32F407开发板",16,0);				    	 
-	Show_Str(30,70,200,16,"USB U盘实验",16,0);					    	 
-	Show_Str(30,90,200,16,"2014年7月22日",16,0);	    	 
-	Show_Str(30,110,200,16,"正点原子@ALIENTEK",16,0); 
-	Show_Str(30,140,200,16,"设备连接中...",16,0);			 		
-	//初始化USB主机
-  	USBH_Init(&USB_OTG_Core,USB_OTG_FS_CORE_ID,&USB_Host,&USBH_MSC_cb,&USR_Callbacks);  
+ 	exfuns_init();							//为fatfs相关变量申请内存				 
+  	f_mount(fs[0],"0:",1); 					//挂载SD卡 
+ 	res=f_mount(fs[1],"1:",1); 				//挂载FLASH.	
+	if(res==0X0D)//FLASH磁盘,FAT文件系统错误,重新格式化FLASH
+	{
+		LCD_ShowString(30,150,200,16,16,"Flash Disk Formatting...");	//格式化FLASH
+		res=f_mkfs("1:",1,4096);//格式化FLASH,1,盘符;1,不需要引导区,8个扇区为1个簇
+		if(res==0)
+		{
+			f_setlabel((const TCHAR *)"1:ALIENTEK");	//设置Flash磁盘的名字为：ALIENTEK
+			LCD_ShowString(30,150,200,16,16,"Flash Disk Format Finish");	//格式化完成
+		}else LCD_ShowString(30,150,200,16,16,"Flash Disk Format Error ");	//格式化失败
+		delay_ms(1000);
+	}													    
+	LCD_Fill(30,150,240,150+16,WHITE);		//清除显示			  
+	while(exf_getfree((u8*)"0",&total,&free))	//得到SD卡的总容量和剩余容量
+	{
+		LCD_ShowString(30,150,200,16,16,"SD Card Fatfs Error!");
+		delay_ms(200);
+		LCD_Fill(30,150,240,150+16,WHITE);	//清除显示			  
+		delay_ms(200);
+		led_switch(LED0);//DS0闪烁
+	}													  			    
+ 	POINT_COLOR=BLUE;//设置字体为蓝色	   
+	LCD_ShowString(30,150,200,16,16,"FATFS OK!");	 
+	LCD_ShowString(30,170,200,16,16,"SD Total Size:     MB");	 
+	LCD_ShowString(30,190,200,16,16,"SD  Free Size:     MB"); 	    
+ 	LCD_ShowNum(30+8*14,170,total>>10,5,16);				//显示SD卡总容量 MB
+ 	LCD_ShowNum(30+8*14,190,free>>10,5,16);					//显示SD卡剩余容量 MB			    
 	while(1)
 	{
-		USBH_Process(&USB_OTG_Core, &USB_Host);
-		delay_ms(1);
-		t++;
-		if(t==200)
-		{
-			led_switch(LED0);
-			t=0;
-		}
-	}	
+		t++; 
+		delay_ms(200);		 			   
+		led_switch(LED0);//DS0闪烁
+	} 
 }
+
+void test_keyboard(void)
+{
+	led_init();
+	delay_init();
+	lcd_init();
+	uart1_init(115200);
+	keyboard_init();
+	while(1)
+	{
+		keyboard_check(); // 初始化后需要运行好多轮才能连接成功，因此不要一上来就延时。多让他运行几次再进入带延时的循环
+		led_off(LED1);
+		if (keyboard_LF()) 
+		{
+			led_on(LED1);
+			u8 buf[100];
+			int len = keyboard_buf_state();
+			keyboard_read_buf(buf, len);
+			buf[len] = '\r';
+			buf[len+1] = '\n';
+			buf[len+2] = 0;
+			printf((char*)buf);
+			delay_ms(500);
+		}
+//		
+//		delay_ms(100);
+	}
+}
+
+
+/******************************************* test_usb_host *******************************************/
+//USBH_HOST  USB_Host;
+//USB_OTG_CORE_HANDLE  USB_OTG_Core_dev;
+//extern HID_Machine_TypeDef HID_Machine;	
+////USB信息显示
+////msgx:0,USB无连接
+////     1,USB键盘
+////     2,USB鼠标
+////     3,不支持的USB设备
+//void USBH_Msg_Show(u8 msgx)
+//{
+//	POINT_COLOR=RED;
+//	switch(msgx)
+//	{
+//		case 0:	//USB无连接
+//			LCD_ShowString(30,130,200,16,16,"USB Connecting...");	
+//			LCD_Fill(0,150,lcddev.width,lcddev.height,WHITE);
+//			break;
+//		case 1:	//USB键盘
+//			LCD_ShowString(30,130,200,16,16,"USB Connected    ");	
+//			LCD_ShowString(30,150,200,16,16,"USB KeyBoard");	 
+//			LCD_ShowString(30,180,210,16,16,"KEYVAL:");	
+//			LCD_ShowString(30,200,210,16,16,"INPUT STRING:");	
+//			break;
+//		case 2:	//USB鼠标
+//			LCD_ShowString(30,130,200,16,16,"USB Connected    ");	
+//			LCD_ShowString(30,150,200,16,16,"USB Mouse");	 
+//			LCD_ShowString(30,180,210,16,16,"BUTTON:");	
+//			LCD_ShowString(30,200,210,16,16,"X POS:");	
+//			LCD_ShowString(30,220,210,16,16,"Y POS:");	
+//			LCD_ShowString(30,240,210,16,16,"Z POS:");	
+//			break; 		
+//		case 3:	//不支持的USB设备
+//			LCD_ShowString(30,130,200,16,16,"USB Connected    ");	
+//			LCD_ShowString(30,150,200,16,16,"Unknow Device");	 
+//			break; 	 
+//	} 
+//}   
+//HID重新连接
+//void USBH_HID_Reconnect(void)
+//{
+//	//关闭之前的连接
+//	USBH_DeInit(&USB_OTG_Core_dev,&USB_Host);	//复位USB HOST
+//	USB_OTG_StopHost(&USB_OTG_Core_dev);		//停止USBhost
+//	if(USB_Host.usr_cb->DeviceDisconnected)		//存在,才禁止
+//	{
+//		USB_Host.usr_cb->DeviceDisconnected(); 	//关闭USB连接
+//		USBH_DeInit(&USB_OTG_Core_dev, &USB_Host);
+//		USB_Host.usr_cb->DeInit();
+//		USB_Host.class_cb->DeInit(&USB_OTG_Core_dev,&USB_Host.device_prop);
+//	}
+//	USB_OTG_DisableGlobalInt(&USB_OTG_Core_dev);//关闭所有中断
+//	//重新复位USB
+//	RCC_AHB2PeriphClockCmd(RCC_AHB2Periph_OTG_FS,ENABLE);//USB OTG FS 复位
+//	delay_ms(5);
+//	RCC_AHB2PeriphClockCmd(RCC_AHB2Periph_OTG_FS,DISABLE);	//复位结束  
+
+//	memset(&USB_OTG_Core_dev,0,sizeof(USB_OTG_CORE_HANDLE));
+//	memset(&USB_Host,0,sizeof(USB_Host));
+//	//重新连接USB HID设备
+//	USBH_Init(&USB_OTG_Core_dev,USB_OTG_FS_CORE_ID,&USB_Host,&HID_cb,&USR_Callbacks);  
+//}
+
+//void test_keyboard(void)
+//{ 
+//	u32 t; 
+//	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);//设置系统中断优先级分组2
+//	delay_init();  //初始化延时函数
+//	uart1_init(115200);		//初始化串口波特率为115200
+//	
+//	led_init();					//初始化LED
+// 	lcd_init();		 	
+//	POINT_COLOR=RED;
+//	LCD_ShowString(30,50,200,16,16,"Explorer STM32F4");	
+//	LCD_ShowString(30,70,200,16,16,"USB MOUSE/KEYBOARD TEST");	
+//	LCD_ShowString(30,90,200,16,16,"ATOM@ALIENTEK");
+//	LCD_ShowString(30,110,200,16,16,"2014/7/23");	 
+//	LCD_ShowString(30,130,200,16,16,"USB Connecting...");	   
+// 	//初始化USB主机
+//  	USBH_Init(&USB_OTG_Core_dev,USB_OTG_FS_CORE_ID,&USB_Host,&HID_cb,&USR_Callbacks);  
+//	while(1)
+//	{
+//		USBH_Process(&USB_OTG_Core_dev, &USB_Host);
+//		if(bDeviceState==1)//连接建立了
+//		{ 
+//			if(USBH_Check_HIDCommDead(&USB_OTG_Core_dev,&HID_Machine))//检测USB HID通信,是否还正常? 
+//			{ 	    
+//				USBH_HID_Reconnect();//重连
+//			}				
+//			
+//		}else	//连接未建立的时候,检测
+//		{
+//			if(USBH_Check_EnumeDead(&USB_Host))	//检测USB HOST 枚举是否死机了?死机了,则重新初始化 
+//			{ 	    
+//				USBH_HID_Reconnect();//重连
+//			}			
+//		}
+//		t++;
+//		if(t==200000)
+//		{
+//			led_switch(LED0);
+//			t=0;
+//		}
+//	}
+//}
+/**************************************************************************************************/
+
+
+////test_usb_host
+////插好otg，在USB_APP/usb_conf.h中173行左右三条语句中解开define USE_HOST_MODE的注释，将另两条注释掉
+//USBH_HOST  USB_Host;
+//USB_OTG_CORE_HANDLE  USB_OTG_Core;
+////用户测试主程序
+////返回值:0,正常
+////       1,有问题
+//u8 USH_User_App(void)
+//{ 
+//	u32 total,free;
+//	u8 res=0;
+//	Show_Str(30,140,200,16,"设备连接成功!.",16,0);	 
+//	res=exf_getfree("2:",&total,&free);
+//	if(res==0)
+//	{
+//		POINT_COLOR=BLUE;//设置字体为蓝色	   
+//		LCD_ShowString(30,160,200,16,16,"FATFS OK!");	
+//		LCD_ShowString(30,180,200,16,16,"U Disk Total Size:     MB");	 
+//		LCD_ShowString(30,200,200,16,16,"U Disk  Free Size:     MB"); 	    
+//		LCD_ShowNum(174,180,total>>10,5,16); //显示U盘总容量 MB
+//		LCD_ShowNum(174,200,free>>10,5,16);	
+//	} 
+// 
+//	while(HCD_IsDeviceConnected(&USB_OTG_Core))//设备连接成功
+//	{	
+//		led_switch(LED0);
+//		delay_ms(200);
+//	}
+//	POINT_COLOR=RED;//设置字体为红色	   
+//	Show_Str(30,140,200,16,"设备连接中...",16,0);
+//	LCD_Fill(30,160,239,220,WHITE);
+//	return res;
+//} 
+//void test_usb_host(void)
+//{        
+//	u8 t;
+//	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);//设置系统中断优先级分组2
+//	delay_init();  //初始化延时函数
+//	uart1_init(115200);		//初始化串口波特率为115200
+//	led_init();				//初始化与LED连接的硬件接口
+//	key_init();				//按键
+//  	lcd_init();				//初始化LCD 
+//	W25QXX_Init();			//SPI FLASH初始化
+//	usmart_dev.init(84); 	//初始化USMART	 
+//	my_mem_init(SRAMIN);	//初始化内部内存池	
+// 	exfuns_init();			//为fatfs相关变量申请内存 
+//	piclib_init();			//初始化画图
+//  	f_mount(fs[0],"0:",1); 	//挂载SD卡  
+//  	f_mount(fs[1],"1:",1); 	//挂载SD卡  
+//  	f_mount(fs[2],"2:",1); 	//挂载U盘
+//	POINT_COLOR=RED;      
+// 	while(font_init()) 				//检查字库
+//	{	    
+//		LCD_ShowString(60,50,200,16,16,"Font Error!");
+//		delay_ms(200);				  
+//		LCD_Fill(60,50,240,66,WHITE);//清除显示	     
+//		delay_ms(200);				  
+//	}
+//	Show_Str(30,50,200,16,"探索者STM32F407开发板",16,0);				    	 
+//	Show_Str(30,70,200,16,"USB U盘实验",16,0);					    	 
+//	Show_Str(30,90,200,16,"2014年7月22日",16,0);	    	 
+//	Show_Str(30,110,200,16,"正点原子@ALIENTEK",16,0); 
+//	Show_Str(30,140,200,16,"设备连接中...",16,0);			 		
+//	//初始化USB主机
+//  	USBH_Init(&USB_OTG_Core,USB_OTG_FS_CORE_ID,&USB_Host,&USBH_MSC_cb,&USR_Callbacks);  
+//	while(1)
+//	{
+//		USBH_Process(&USB_OTG_Core, &USB_Host);
+//		delay_ms(1);
+//		t++;
+//		if(t==200)
+//		{
+//			led_switch(LED0);
+//			t=0;
+//		}
+//	}	
+//}
 
 //// 插好sd卡，在USB_APP/usb_conf.h中173行左右三条语句中解开define USE_DEVICE_MODE的注释，将另两条注释掉
 // USB_OTG_CORE_HANDLE USB_OTG_dev;
@@ -146,7 +350,7 @@ void test_usb_host(void)
 //	delay_init();  //初始化延时函数
 //	uart1_init(115200);		//初始化串口波特率为115200
 //	led_init();					//初始化LED  
-// 	LCD_Init();					//LCD初始化  
+// 	lcd_init();					//LCD初始化  
 // 	key_init();					//按键初始化  
 //	W25QXX_Init();				//初始化W25Q128  
 //  
@@ -279,7 +483,7 @@ void test_lcd_touch_screen(void)
 	delay_init();
 	
 	led_init();
-	LCD_Init();
+	lcd_init();
 	key_init();
 	
 	tp_dev.init();				//触摸屏初始化
@@ -313,7 +517,7 @@ void test_lcd_show(void)
 	delay_init();      //初始化延时函数
 	
 	led_init();					  //初始化LED
- 	LCD_Init();           //初始化LCD FSMC接口
+ 	lcd_init();           //初始化LCD FSMC接口
 	POINT_COLOR=RED;      //画笔颜色：红色
 	LCD_ShowString(0,0,200,16,16,"fuck");
 	LCD_ShowString(0,16,200,16,16,"your");		//显示LCD ID	      					 

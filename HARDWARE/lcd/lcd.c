@@ -597,7 +597,7 @@ void LCD_Set_Window(u16 sx,u16 sy,u16 width,u16 height)
 //初始化lcd
 //该初始化函数可以初始化各种ILI93XX液晶,但是其他函数是基于ILI9320的!!!
 //在其他型号的驱动芯片上没有测试! 
-void LCD_Init(void)
+void lcd_init(void)
 { 	
 	vu32 i=0;
 

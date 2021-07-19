@@ -1,14 +1,17 @@
-#include "usbh_usr.h" 
-#include "led.h"
-#include "ff.h" 
-#include "usart.h" 
+#include "usbh_usr.h"
+#include "usb_hcd_int.h"
+#include "usbh_hid_mouse.h"
+#include "usbh_hid_keybd.h"  
+#include "delay.h"  
+#include "lcd.h"  
+#include "string.h"  
 //////////////////////////////////////////////////////////////////////////////////	 
 //本程序只供学习使用，未经作者许可，不得用于其它任何用途
 //ALIENTEK STM32F407开发板
 //USBH-USR 代码	   
 //正点原子@ALIENTEK
 //技术论坛:www.openedv.com
-//创建日期:2014/7/22
+//创建日期:2014/7/23
 //版本：V1.0
 //版权所有，盗版必究。
 //Copyright(C) 广州市星翼电子科技有限公司 2009-2019
@@ -17,60 +20,94 @@
 //修改信息
 //无
 ////////////////////////////////////////////////////////////////////////////////// 	   
+ 
+//表示USB连接状态
+//0,没有连接;
+//1,已经连接;
+vu8 bDeviceState=0;		//默认没有连接  
 
-static u8 AppState;
-extern USB_OTG_CORE_HANDLE  USB_OTG_Core;
+
+extern USB_OTG_CORE_HANDLE USB_OTG_Core_dev;
+void USBH_Msg_Show(u8 msgx)
+{
+	POINT_COLOR=RED;
+	switch(msgx)
+	{
+		case 0:	//USB无连接
+			LCD_ShowString(30,130,200,16,16,"USB Connecting...");	
+			LCD_Fill(0,150,lcddev.width,lcddev.height,WHITE);
+			break;
+		case 1:	//USB键盘
+			LCD_ShowString(30,130,200,16,16,"USB Connected    ");	
+			LCD_ShowString(30,150,200,16,16,"USB KeyBoard");	 
+			LCD_ShowString(30,180,210,16,16,"KEYVAL:");	
+			LCD_ShowString(30,200,210,16,16,"INPUT STRING:");	
+			break;
+		case 2:	//USB鼠标
+			LCD_ShowString(30,130,200,16,16,"USB Connected    ");	
+			LCD_ShowString(30,150,200,16,16,"USB Mouse");	 
+			LCD_ShowString(30,180,210,16,16,"BUTTON:");	
+			LCD_ShowString(30,200,210,16,16,"X POS:");	
+			LCD_ShowString(30,220,210,16,16,"Y POS:");	
+			LCD_ShowString(30,240,210,16,16,"Z POS:");	
+			break; 		
+		case 3:	//不支持的USB设备
+			LCD_ShowString(30,130,200,16,16,"USB Connected    ");	
+			LCD_ShowString(30,150,200,16,16,"Unknow Device");	 
+			break; 	 
+	} 
+}  
+u8 USB_FIRST_PLUGIN_FLAG=0;	//USB第一次插入标志,如果为1,说明是第一次插入
 
 //USB OTG 中断服务函数
 //处理所有USB中断
 void OTG_FS_IRQHandler(void)
-{
-  	USBH_OTG_ISR_Handler(&USB_OTG_Core);
-} 
-//USB HOST 用户回调函数.
-USBH_Usr_cb_TypeDef USR_Callbacks=
-{
-	USBH_USR_Init,
-	USBH_USR_DeInit,
-	USBH_USR_DeviceAttached,
-	USBH_USR_ResetDevice,
-	USBH_USR_DeviceDisconnected,
-	USBH_USR_OverCurrentDetected,
-	USBH_USR_DeviceSpeedDetected,
-	USBH_USR_Device_DescAvailable,
-	USBH_USR_DeviceAddressAssigned,
-	USBH_USR_Configuration_DescAvailable,
-	USBH_USR_Manufacturer_String,
-	USBH_USR_Product_String,
-	USBH_USR_SerialNum_String,
-	USBH_USR_EnumerationDone,
-	USBH_USR_UserInput,
-	USBH_USR_MSC_Application,
-	USBH_USR_DeviceNotSupported,
-	USBH_USR_UnrecoveredError
-};
-/////////////////////////////////////////////////////////////////////////////////
-//以下为各回调函数实现.
+{ 
+	USBH_OTG_ISR_Handler(&USB_OTG_Core_dev);
+}  
 
+//USB HOST 用户回调函数.
+USBH_Usr_cb_TypeDef USR_Callbacks =
+{
+  USBH_USR_Init,
+  USBH_USR_DeInit,
+  USBH_USR_DeviceAttached,
+  USBH_USR_ResetDevice,
+  USBH_USR_DeviceDisconnected,
+  USBH_USR_OverCurrentDetected,
+  USBH_USR_DeviceSpeedDetected,
+  USBH_USR_Device_DescAvailable,
+  USBH_USR_DeviceAddressAssigned,
+  USBH_USR_Configuration_DescAvailable,
+  USBH_USR_Manufacturer_String,
+  USBH_USR_Product_String,
+  USBH_USR_SerialNum_String,
+  USBH_USR_EnumerationDone,
+  USBH_USR_UserInput,
+  NULL,
+  USBH_USR_DeviceNotSupported,
+  USBH_USR_UnrecoveredError
+};
+ 
 //USB HOST 初始化 
 void USBH_USR_Init(void)
 {
-	printf("USB OTG HS MSC Host\r\n");
+	printf("USB OTG FS MSC Host\r\n");
 	printf("> USB Host library started.\r\n");
 	printf("  USB Host Library v2.1.0\r\n\r\n");
 	
 }
 //检测到U盘插入
 void USBH_USR_DeviceAttached(void)//U盘插入
-{
-	led_off(LED1);
+{ 
 	printf("检测到USB设备插入!\r\n");
 }
 //检测到U盘拔出
 void USBH_USR_DeviceDisconnected (void)//U盘移除
-{
-	led_on(LED1);
+{ 
 	printf("USB设备拔出!\r\n");
+	bDeviceState=0;	//USB设备拔出了
+//	USBH_Msg_Show(0);
 }  
 //复位从机
 void USBH_USR_ResetDevice(void)
@@ -149,111 +186,79 @@ void USBH_USR_EnumerationDone(void)
 } 
 //无法识别的USB设备
 void USBH_USR_DeviceNotSupported(void)
-{
+{ 
+//	USBH_Msg_Show(3);//无法识别的USB设备
 	printf("无法识别的USB设备!\r\n\r\n");    
 }  
 //等待用户输入按键,执行下一步操作
 USBH_USR_Status USBH_USR_UserInput(void)
 { 
 	printf("跳过用户确认步骤!\r\n");
+	bDeviceState=1;//USB设备已经连接成功
 	return USBH_USR_RESP_OK;
 } 
 //USB接口电流过载
 void USBH_USR_OverCurrentDetected (void)
 {
 	printf("端口电流过大!!!\r\n");
-} 
-
-extern u8 USH_User_App(void);		//用户测试主程序
-//USB HOST MSC类用户应用程序
-int USBH_USR_MSC_Application(void)
-{
-	u8 res=0;
-  	switch(AppState)
-  	{
-    	case USH_USR_FS_INIT://初始化文件系统 
-			printf("开始执行用户程序!!!\r\n");
-			AppState=USH_USR_FS_TEST;
-      		break;
-    	case USH_USR_FS_TEST:	//执行USB OTG 测试主程序
-			res=USH_User_App(); //用户主程序
-     		res=0;
-			if(res)AppState=USH_USR_FS_INIT;
-      		break;
-    	default:break;
-  	} 
-	return res;
-}
-//用户要求重新初始化设备
+}  
+//重新初始化
 void USBH_USR_DeInit(void)
 {
-  	AppState=USH_USR_FS_INIT;
+	printf("重新初始化!!!\r\n");
 }
 //无法恢复的错误!!  
 void USBH_USR_UnrecoveredError (void)
 {
 	printf("无法恢复的错误!!!\r\n\r\n");	
 }
-////////////////////////////////////////////////////////////////////////////////////////
-//用户定义函数,实现fatfs diskio的接口函数 
-extern USBH_HOST              USB_Host;
+//////////////////////////////////////////////////////////////////////////////////////////
+//下面两个函数,为ALIENTEK添加,以防止USB死机
 
-//获取U盘状态
-//返回值:0,U盘未就绪
-//      1,就绪
-u8 USBH_UDISK_Status(void)
+//USB枚举状态死机检测,防止USB枚举失败导致的死机
+//phost:USB_HOST结构体指针
+//返回值:0,没有死机
+//       1,死机了,外部必须重新启动USB连接.
+u8 USBH_Check_EnumeDead(USBH_HOST *phost)
 {
-	return HCD_IsDeviceConnected(&USB_OTG_Core);//返回U盘状态
+	static u16 errcnt=0;
+	//这个状态,如果持续存在,则说明USB死机了.
+	if(phost->gState==HOST_CTRL_XFER&&(phost->EnumState==ENUM_IDLE||phost->EnumState==ENUM_GET_FULL_DEV_DESC))
+	{
+		errcnt++;
+		if(errcnt>2000)//死机了
+		{ 
+			errcnt=0;
+			RCC_AHB2PeriphClockCmd(RCC_AHB2Periph_OTG_FS,ENABLE);//USB OTG FS 复位
+			delay_ms(5);
+			RCC_AHB2PeriphClockCmd(RCC_AHB2Periph_OTG_FS,DISABLE);	//复位结束  
+			return 1;
+		} 
+	}else errcnt=0;
+	return 0;
+} 
+//USB HID通信死机检测,防止USB通信死机(暂时仅针对:DTERR,即Data toggle error)
+//pcore:USB_OTG_Core_dev_HANDLE结构体指针
+//phidm:HID_Machine_TypeDef结构体指针 
+//返回值:0,没有死机
+//       1,死机了,外部必须重新启动USB连接.
+u8 USBH_Check_HIDCommDead(USB_OTG_CORE_HANDLE *pcore,HID_Machine_TypeDef *phidm)
+{
+ 	if(pcore->host.HC_Status[phidm->hc_num_in]==HC_DATATGLERR)//检测到DTERR错误,直接重启USB.
+	{  
+		return 1;
+	}
+	return 0;
 }
 
-//读U盘
-//buf:读数据缓存区
-//sector:扇区地址
-//cnt:扇区个数	
-//返回值:错误状态;0,正常;其他,错误代码;		 
-u8 USBH_UDISK_Read(u8* buf,u32 sector,u32 cnt)
-{
-	u8 res=1;
-	if(HCD_IsDeviceConnected(&USB_OTG_Core)&&AppState==USH_USR_FS_TEST)//连接还存在,且是APP测试状态
-	{  		    
-		do
-		{
-			res=USBH_MSC_Read10(&USB_OTG_Core,buf,sector,512*cnt);
-			USBH_MSC_HandleBOTXfer(&USB_OTG_Core ,&USB_Host);		      
-			if(!HCD_IsDeviceConnected(&USB_OTG_Core))
-			{
-				res=1;//读写错误
-				break;
-			};   
-		}while(res==USBH_MSC_BUSY);
-	}else res=1;		  
-	if(res==USBH_MSC_OK)res=0;	
-	return res;
-}
+//////////////////////////////////////////////////////////////////////////////////////////
+//USB键盘鼠标数据处理
 
-//写U盘
-//buf:写数据缓存区
-//sector:扇区地址
-//cnt:扇区个数	
-//返回值:错误状态;0,正常;其他,错误代码;		 
-u8 USBH_UDISK_Write(u8* buf,u32 sector,u32 cnt)
+//鼠标初始化
+void USR_MOUSE_Init	(void)
 {
-	u8 res=1;
-	if(HCD_IsDeviceConnected(&USB_OTG_Core)&&AppState==USH_USR_FS_TEST)//连接还存在,且是APP测试状态
-	{  		    
-		do
-		{
-			res=USBH_MSC_Write10(&USB_OTG_Core,buf,sector,512*cnt); 
-			USBH_MSC_HandleBOTXfer(&USB_OTG_Core ,&USB_Host);		      
-			if(!HCD_IsDeviceConnected(&USB_OTG_Core))
-			{
-				res=1;//读写错误
-				break;
-			};   
-		}while(res==USBH_MSC_BUSY);
-	}else res=1;		  
-	if(res==USBH_MSC_OK)res=0;	
-	return res;
+ 	USBH_Msg_Show(2);		//USB 鼠标
+	USB_FIRST_PLUGIN_FLAG=1;//标记第一次插入
 }
 
 
@@ -270,22 +275,102 @@ u8 USBH_UDISK_Write(u8* buf,u32 sector,u32 cnt)
 
 
 
+//键盘初始化
+void  USR_KEYBRD_Init(void)
+{ 
+// 	USBH_Msg_Show(1);		//USB 键盘
+	USB_FIRST_PLUGIN_FLAG=1;//标记第一次插入
+}
 
 
+/************************************** 用于用户函数查询，开放为外部变量 *************************************/
+//零时数组,用于存放鼠标坐标/键盘输入内容(4.3屏,最大可以输入2016字节)
+#define KEYBOARD_BUF_MAX_LEN 2017
+__align(4) u8 tbuf[KEYBOARD_BUF_MAX_LEN]; 
+u8* keyboard_buf = tbuf; // 给tbuf取个别名，供外部查看方便
+u16 keyboard_buf_pos = 0;
+u8 LF_FLAG = 0;
+/********************************************************************************************/
+
+//USB鼠标数据处理
+//data:USB鼠标数据结构体指针
+void USR_MOUSE_ProcessData(HID_MOUSE_Data_TypeDef *data)
+{  
+	static signed short x,y,z; 
+	if(USB_FIRST_PLUGIN_FLAG)//第一次插入,将数据清零
+	{
+		USB_FIRST_PLUGIN_FLAG=0;
+		x=y=z=0;
+	}
+	x+=(signed char)data->x;
+	if(x>9999)x=9999;
+	if(x<-9999)x=-9999;
+	y+=(signed char)data->y;
+	if(y>9999)y=9999;
+	if(y<-9999)y=-9999;
+	z+=(signed char)data->z;
+	if(z>9999)z=9999;
+	if(z<-9999)z=-9999;
+	POINT_COLOR=BLUE;
+	sprintf((char*)tbuf,"BUTTON:");
+	if(data->button&0X01)strcat((char*)tbuf,"LEFT");
+	if((data->button&0X03)==0X02)strcat((char*)tbuf,"RIGHT");
+	else if((data->button&0X03)==0X03)strcat((char*)tbuf,"+RIGHT");
+	if((data->button&0X07)==0X04)strcat((char*)tbuf,"MID");
+	else if((data->button&0X07)>0X04)strcat((char*)tbuf,"+MID");  
+ 	LCD_Fill(30+56,180,lcddev.width,180+16,WHITE);	
+	LCD_ShowString(30,180,210,16,16,(char*)tbuf);	
+	sprintf((char*)tbuf,"X POS:%05d",x); 
+	LCD_ShowString(30,200,200,16,16,(char*)tbuf);	
+	sprintf((char*)tbuf,"Y POS:%05d",y);
+	LCD_ShowString(30,220,200,16,16,(char*)tbuf);	
+	sprintf((char*)tbuf,"Z POS:%05d",z);
+	LCD_ShowString(30,240,200,16,16,(char*)tbuf);	 
+	//printf("btn,X,Y,Z:0x%x,%d,%d,%d\r\n",data->button,(signed char)data->x,(signed char)data->y,(signed char)data->z);   
+} 
 
 
+//USB键盘数据处理
+//data:USB键盘输入内容
+void  USR_KEYBRD_ProcessData (uint8_t data)
+{ 
+//	static u16 endx,endy;
 
-
-
-
-
-
-
-
-
-
-
-
+//	u8 buf[4];
+	if(USB_FIRST_PLUGIN_FLAG)//第一次插入,将数据清零
+	{
+		USB_FIRST_PLUGIN_FLAG=0;
+//		endx=((lcddev.width-30)/8)*8+30;		//得到endx值
+//		endy=((lcddev.height-220)/16)*16+220;	//得到endy值
+//		maxinputchar=((lcddev.width-30)/8);
+//		maxinputchar*=(lcddev.height-220)/16;	//当前LCD最大可以显示的字符数.
+		keyboard_buf_pos = 0;
+	}
+//	POINT_COLOR=BLUE;
+//	sprintf((char*)buf,"%02X",data);
+//	LCD_ShowString(30+56,180,200,16,16,(char*)buf);//显示键值	 
+	if(data>=' ' && data<='~' && keyboard_buf_pos < KEYBOARD_BUF_MAX_LEN)
+	{
+		tbuf[keyboard_buf_pos++]=data;
+		tbuf[keyboard_buf_pos]=0;		//添加结束符. 
+		LF_FLAG = 0;
+	}else if(data==0X0D)	//退格键
+	{
+		if(keyboard_buf_pos)keyboard_buf_pos--;
+		tbuf[keyboard_buf_pos]=0;		//添加结束符. 
+		LF_FLAG = 0;
+	} else if (data == 0X0A)
+	{
+		LF_FLAG = 1;
+	}
+//	if(keyboard_buf_pos<=KEYBOARD_BUF_MAX_LEN)	//没有超过显示区
+//	{
+//		LCD_Fill(30,220,endx,endy,WHITE);
+//		LCD_ShowString(30,220,endx-30,endy-220,16,(char*)tbuf);
+//	}		
+	//printf("KEY Board Value:%02X\r\n",data);
+	//printf("KEY Board Char:%c\r\n",data); 
+}
 
 
 

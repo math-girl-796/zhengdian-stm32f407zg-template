@@ -335,7 +335,7 @@
               <MiscControls></MiscControls>
               <Define>STM32F40_41xxx,USE_STDPERIPH_DRIVER,USE_USB_OTG_FS</Define>
               <Undefine></Undefine>
-              <IncludePath>..\CORE;..\SYSTEM\delay;..\SYSTEM\sys;..\SYSTEM\usart;..\SYSTEM\utils;..\USER;..\FWLIB\inc;..\HARDWARE\led;..\HARDWARE\step_motor;..\HARDWARE\key;..\HARDWARE\pwm;..\HARDWARE\rocker;..\HARDWARE\steer;..\HARDWARE\lcd;..\HARDWARE\touch;..\HARDWARE\24CXX;..\HARDWARE\IIC;..\HARDWARE\SDIO;..\HARDWARE\SPI;..\HARDWARE\SRAM;..\HARDWARE\W25QXX;..\USB\STM32_USB_OTG_Driver\inc;..\USB\STM32_USB_Device_Library\Core\inc;..\USB\STM32_USB_Device_Library\Class\msc\inc;..\USB\STM32_USB_HOST_Library\Core\inc;..\USB\STM32_USB_HOST_Library\Class\MSC\inc;..\USB\USB_APP;..\MALLOC;..\FATFS\src;..\FATFS\exfuns;..\PICTURE;..\USMART;..\TEXT</IncludePath>
+              <IncludePath>..\CORE;..\SYSTEM\delay;..\SYSTEM\sys;..\SYSTEM\usart;..\SYSTEM\utils;..\USER;..\FWLIB\inc;..\HARDWARE\led;..\HARDWARE\step_motor;..\HARDWARE\key;..\HARDWARE\pwm;..\HARDWARE\rocker;..\HARDWARE\steer;..\HARDWARE\lcd;..\HARDWARE\touch;..\HARDWARE\24CXX;..\HARDWARE\IIC;..\HARDWARE\SDIO;..\HARDWARE\SPI;..\HARDWARE\SRAM;..\HARDWARE\W25QXX;..\USB\STM32_USB_OTG_Driver\inc;..\USB\STM32_USB_Device_Library\Core\inc;..\USB\STM32_USB_Device_Library\Class\msc\inc;..\USB\STM32_USB_HOST_Library\Core\inc;..\USB\STM32_USB_HOST_Library\Class\MSC\inc;..\USB\USB_APP;..\MALLOC;..\USMART;..\USB\STM32_USB_HOST_Library\Class\HID\inc;..\HARDWARE\keyboard;..\FATFS\src;..\FATFS\exfuns</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -714,6 +714,11 @@
               <FileType>1</FileType>
               <FilePath>..\HARDWARE\W25QXX\w25qxx.c</FilePath>
             </File>
+            <File>
+              <FileName>keyboard.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\HARDWARE\keyboard\keyboard.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -789,6 +794,21 @@
               <FileType>1</FileType>
               <FilePath>..\USB\STM32_USB_HOST_Library\Class\MSC\src\usbh_msc_scsi.c</FilePath>
             </File>
+            <File>
+              <FileName>usbh_hid_core.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\USB\STM32_USB_HOST_Library\Class\HID\src\usbh_hid_core.c</FilePath>
+            </File>
+            <File>
+              <FileName>usbh_hid_keybd.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\USB\STM32_USB_HOST_Library\Class\HID\src\usbh_hid_keybd.c</FilePath>
+            </File>
+            <File>
+              <FileName>usbh_hid_mouse.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\USB\STM32_USB_HOST_Library\Class\HID\src\usbh_hid_mouse.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -798,61 +818,6 @@
               <FileName>malloc.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\MALLOC\malloc.c</FilePath>
-            </File>
-          </Files>
-        </Group>
-        <Group>
-          <GroupName>FATFS</GroupName>
-          <Files>
-            <File>
-              <FileName>diskio.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\FATFS\src\diskio.c</FilePath>
-            </File>
-            <File>
-              <FileName>ff.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\FATFS\src\ff.c</FilePath>
-            </File>
-            <File>
-              <FileName>exfuns.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\FATFS\exfuns\exfuns.c</FilePath>
-            </File>
-            <File>
-              <FileName>fattester.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\FATFS\exfuns\fattester.c</FilePath>
-            </File>
-            <File>
-              <FileName>mycc936.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\FATFS\exfuns\mycc936.c</FilePath>
-            </File>
-          </Files>
-        </Group>
-        <Group>
-          <GroupName>PICTURE</GroupName>
-          <Files>
-            <File>
-              <FileName>bmp.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\PICTURE\bmp.c</FilePath>
-            </File>
-            <File>
-              <FileName>gif.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\PICTURE\gif.c</FilePath>
-            </File>
-            <File>
-              <FileName>piclib.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\PICTURE\piclib.c</FilePath>
-            </File>
-            <File>
-              <FileName>tjpgd.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\PICTURE\tjpgd.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -877,17 +842,32 @@
           </Files>
         </Group>
         <Group>
-          <GroupName>TEXT</GroupName>
+          <GroupName>FATFS</GroupName>
           <Files>
             <File>
-              <FileName>fontupd.c</FileName>
+              <FileName>diskio.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\TEXT\fontupd.c</FilePath>
+              <FilePath>..\FATFS\src\diskio.c</FilePath>
             </File>
             <File>
-              <FileName>text.c</FileName>
+              <FileName>ff.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\TEXT\text.c</FilePath>
+              <FilePath>..\FATFS\src\ff.c</FilePath>
+            </File>
+            <File>
+              <FileName>cc936.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\FATFS\src\option\cc936.c</FilePath>
+            </File>
+            <File>
+              <FileName>exfuns.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\FATFS\exfuns\exfuns.c</FilePath>
+            </File>
+            <File>
+              <FileName>fattester.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\FATFS\exfuns\fattester.c</FilePath>
             </File>
           </Files>
         </Group>

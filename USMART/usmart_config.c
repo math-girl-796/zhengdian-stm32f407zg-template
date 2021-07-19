@@ -2,9 +2,11 @@
 #include "usmart_str.h"
 ////////////////////////////用户配置区///////////////////////////////////////////////
 //这下面要包含所用到的函数所申明的头文件(用户自己添加) 
-#include "delay.h"	 
-#include "fattester.h"  
-#include "piclib.h"  
+#include "delay.h"	
+#include "usart.h"		
+#include "sys.h" 	
+#include "w25qxx.h"  
+#include "fattester.h" 
 
 
 //函数名列表初始化(用户自己添加)
@@ -14,7 +16,11 @@ struct _m_usmart_nametab usmart_nametab[]=
 #if USMART_USE_WRFUNS==1 	//如果使能了读写操作
 	(void*)read_addr,"u32 read_addr(u32 addr)",
 	(void*)write_addr,"void write_addr(u32 addr,u32 val)",	 
-#endif	 
+#endif		   
+	(void*)delay_ms,"void delay_ms(u16 nms)",
+ 	(void*)delay_us,"void delay_us(u32 nus)", 
+
+	(void*)W25QXX_Erase_Chip,"void W25QXX_Erase_Chip(void)", 
 	(void*)mf_mount,"u8 mf_mount(u8* path,u8 mt)", 
 	(void*)mf_open,"u8 mf_open(u8*path,u8 mode)", 
 	(void*)mf_close,"u8 mf_close(void)", 
@@ -37,10 +43,6 @@ struct _m_usmart_nametab usmart_nametab[]=
 	(void*)mf_gets,"void mf_gets(u16 size)", 
 	(void*)mf_putc,"u8 mf_putc(u8 c)", 
 	(void*)mf_puts,"u8 mf_puts(u8*c)", 		
-
-	(void*)mf_scan_files,"u8 mf_scan_files(u8 * path)", 	 
-	(void*)ai_load_picfile,"u8 ai_load_picfile(const u8 *filename,u16 x,u16 y,u16 width,u16 height,u8 fast)", 	 
-	(void*)minibmp_decode,"u8 minibmp_decode(u8 *filename,u16 x,u16 y,u16 width,u16 height,u16 acolor,u8 mode)", 	 
 };						
 					  
 ///////////////////////////////////END///////////////////////////////////////////////

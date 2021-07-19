@@ -11,7 +11,6 @@
 #include "sdio_sdcard.h"
 #include "w25qxx.h"
 #include "malloc.h"		
-#include "usbh_usr.h"
 //////////////////////////////////////////////////////////////////////////////////	 
 //本程序只供学习使用，未经作者许可，不得用于其它任何用途
 //ALIENTEK STM32F407开发板
@@ -19,19 +18,15 @@
 //正点原子@ALIENTEK
 //技术论坛:www.openedv.com
 //创建日期:2014/5/15
-//版本：V1.1
+//版本：V1.0
 //版权所有，盗版必究。
 //Copyright(C) 广州市星翼电子科技有限公司 2014-2024
 //All rights reserved									  
-//********************************************************************************
-//V1.1 20140722
-//新增对U盘的支持
 ////////////////////////////////////////////////////////////////////////////////// 	 
 
 
 #define SD_CARD	 0  //SD卡,卷标为0
 #define EX_FLASH 1	//外部flash,卷标为1
-#define USB_DISK 2	//U盘,卷标为2
 
 #define FLASH_SECTOR_SIZE 	512			  
 //对于W25Q128
@@ -54,9 +49,6 @@ DSTATUS disk_initialize (
 			W25QXX_Init();
 			FLASH_SECTOR_COUNT=2048*12;//W25Q1218,前12M字节给FATFS占用 
  			break;
-		case USB_DISK://外部flash
-	  		if(USBH_UDISK_Status())return 0;	//U盘连接成功,则返回1.否则返回0		  
-			else return 1;	 
 		default:
 			res=1; 
 	}		 
@@ -106,9 +98,6 @@ DRESULT disk_read (
 			}
 			res=0;
 			break;
-		case USB_DISK://U盘 
-			res=USBH_UDISK_Read(buff,sector,count);	  
-			break;
 		default:
 			res=1; 
 	}
@@ -151,9 +140,6 @@ DRESULT disk_write (
 				buff+=FLASH_SECTOR_SIZE;
 			}
 			res=0;
-			break;
-		case USB_DISK://U盘
-			res=USBH_UDISK_Write((u8*)buff,sector,count); 
 			break;
 		default:
 			res=1; 
@@ -223,29 +209,6 @@ DRESULT disk_ioctl (
 		        res = RES_PARERR;
 		        break;
 	    }
-	}else if(pdrv==USB_DISK)	//U盘
-	{
-	    switch(cmd)
-	    {
-		    case CTRL_SYNC:
-				res = RES_OK; 
-		        break;	 
-		    case GET_SECTOR_SIZE:
-		        *(WORD*)buff=512;
-		        res = RES_OK;
-		        break;	 
-		    case GET_BLOCK_SIZE:
-		        *(WORD*)buff=512;
-		        res = RES_OK;
-		        break;	 
-		    case GET_SECTOR_COUNT:
-		        *(DWORD*)buff=USBH_MSC_Param.MSCapacity;
-		        res = RES_OK;
-		        break;
-		    default:
-		        res = RES_PARERR;
-		        break;
-	    }		
 	}else res=RES_ERROR;//其他的不支持
     return res;
 }

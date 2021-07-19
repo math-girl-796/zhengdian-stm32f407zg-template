@@ -4,7 +4,7 @@
   * @author  MCD Application Team
   * @version V2.1.0
   * @date    19-March-2012
-  * @brief   Header file for usbh_usr.c
+  * @brief   This file is the header file for usb usr file
   ******************************************************************************
   * @attention
   *
@@ -25,39 +25,42 @@
   ******************************************************************************
   */ 
 
+
 /* Define to prevent recursive inclusion -------------------------------------*/
 #ifndef __USH_USR_H__
 #define __USH_USR_H__
 
+
 /* Includes ------------------------------------------------------------------*/
-#include "ff.h"
 #include "usbh_core.h"
+#include "usbh_hid_core.h"
 #include "usb_conf.h"
 #include <stdio.h>
-#include "usbh_msc_core.h"
-#include "usb_hcd_int.h"
 
 /** @addtogroup USBH_USER
-  * @{
-  */
+* @{
+*/
 
-/** @addtogroup USBH_MSC_DEMO_USER_CALLBACKS
-  * @{
-  */
-
-/** @defgroup USBH_USR
-  * @brief This file is the Header file for usbh_usr.c
+/** @addtogroup USBH_HID_DEMO_USER_CALLBACKS
+* @{
+*/
+  
+/** @defgroup USBH_USR 
+  * @brief This file is the header file for user action
   * @{
   */ 
 
 
-/** @defgroup USBH_USR_Exported_Types
+/** @defgroup USBH_CORE_Exported_Variables
   * @{
   */ 
 
 
 extern  USBH_Usr_cb_TypeDef USR_Callbacks;
-
+//表示USB连接状态
+//0,没有连接;
+//1,已经连接;
+extern vu8 bDeviceState;		//默认没有连接  
 
 
 /**
@@ -65,37 +68,10 @@ extern  USBH_Usr_cb_TypeDef USR_Callbacks;
   */ 
 
 
-
-/** @defgroup USBH_USR_Exported_Defines
+/** @defgroup USBH_CORE_Exported_FunctionsPrototype
   * @{
   */ 
-/* State Machine for the USBH_USR_ApplicationState */
-#define USH_USR_FS_INIT       	0
-#define USH_USR_FS_TEST   		1  
 
- 
-/**
-  * @}
-  */ 
-
-/** @defgroup USBH_USR_Exported_Macros
-  * @{
-  */ 
-/**
-  * @}
-  */ 
-
-/** @defgroup USBH_USR_Exported_Variables
-  * @{
-  */ 
-extern  uint8_t USBH_USR_ApplicationState ;
-/**
-  * @}
-  */ 
-
-/** @defgroup USBH_USR_Exported_FunctionsPrototype
-  * @{
-  */ 
 void USBH_USR_ApplicationSelected(void);
 void USBH_USR_Init(void);
 void USBH_USR_DeInit(void);
@@ -117,23 +93,17 @@ USBH_USR_Status USBH_USR_UserInput(void);
 void USBH_USR_DeInit(void);
 void USBH_USR_DeviceNotSupported(void);
 void USBH_USR_UnrecoveredError(void);
-int USBH_USR_MSC_Application(void);
 
-
-u8 USBH_UDISK_Status(void);
-u8 USBH_UDISK_Read(u8* buf,u32 sector,u32 cnt);
-u8 USBH_UDISK_Write(u8* buf,u32 sector,u32 cnt);
-
-/**
-  * @}
-  */ 
-
-#endif /*__USH_USR_H__*/
+//自行添加的函数
+u8 USBH_Check_EnumeDead(USBH_HOST *phost);
+u8 USBH_Check_HIDCommDead(USB_OTG_CORE_HANDLE *pcore,HID_Machine_TypeDef *phidm);
+void USBH_Msg_Show(u8 msgx);
 
 /**
   * @}
   */ 
 
+#endif /* __USBH_USR_H */
 /**
   * @}
   */ 
@@ -142,5 +112,7 @@ u8 USBH_UDISK_Write(u8* buf,u32 sector,u32 cnt);
   * @}
   */ 
 
+/**
+  * @}
+  */ 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
-

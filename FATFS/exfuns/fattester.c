@@ -29,7 +29,7 @@ u8 mf_mount(u8* path,u8 mt)
 }
 //打开路径下的文件
 //path:路径+文件名
-//mode:打开模式
+//mode:打开模式[1：只读；2：只写；3：读写]
 //返回值:执行结果
 u8 mf_open(u8*path,u8 mode)
 {

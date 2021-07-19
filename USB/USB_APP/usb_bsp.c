@@ -20,8 +20,7 @@
 
 //USB主机电源控制口
 #define USB_HOST_PWRCTRL 	PAout(15)	//PA15
- 
- 
+   
 //USB OTG 底层IO初始化
 //pdev:USB OTG内核结构体指针
 void USB_OTG_BSP_Init(USB_OTG_CORE_HANDLE *pdev)
@@ -58,8 +57,7 @@ void USB_OTG_BSP_EnableInterrupt(USB_OTG_CORE_HANDLE *pdev)
   NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x00;//抢占优先级0
   NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x03;//子优先级3
   NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;//使能通道
-  NVIC_Init(&NVIC_InitStructure);//配置 
-	
+  NVIC_Init(&NVIC_InitStructure);//配置  
 }
 //USB OTG 中断设置,开启USB FS中断
 //pdev:USB OTG内核结构体指针
