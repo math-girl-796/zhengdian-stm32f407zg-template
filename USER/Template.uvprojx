@@ -335,7 +335,7 @@
               <MiscControls></MiscControls>
               <Define>STM32F40_41xxx,USE_STDPERIPH_DRIVER,USE_USB_OTG_FS</Define>
               <Undefine></Undefine>
-              <IncludePath>..\CORE;..\SYSTEM\delay;..\SYSTEM\sys;..\SYSTEM\usart;..\SYSTEM\utils;..\USER;..\FWLIB\inc;..\HARDWARE\led;..\HARDWARE\step_motor;..\HARDWARE\key;..\HARDWARE\pwm;..\HARDWARE\rocker;..\HARDWARE\steer;..\HARDWARE\lcd;..\HARDWARE\touch;..\HARDWARE\24CXX;..\HARDWARE\IIC;..\HARDWARE\SDIO;..\HARDWARE\SPI;..\HARDWARE\SRAM;..\HARDWARE\W25QXX;..\USB\STM32_USB_OTG_Driver\inc;..\USB\STM32_USB_Device_Library\Core\inc;..\USB\STM32_USB_Device_Library\Class\msc\inc;..\USB\STM32_USB_HOST_Library\Core\inc;..\USB\STM32_USB_HOST_Library\Class\MSC\inc;..\USB\USB_APP;..\MALLOC;..\USMART;..\USB\STM32_USB_HOST_Library\Class\HID\inc;..\HARDWARE\keyboard;..\FATFS\src;..\FATFS\exfuns;..\HARDWARE\flash;..\HARDWARE\timer</IncludePath>
+              <IncludePath>..\CORE;..\SYSTEM\delay;..\SYSTEM\sys;..\SYSTEM\usart;..\SYSTEM\utils;..\USER;..\FWLIB\inc;..\HARDWARE\led;..\HARDWARE\step_motor;..\HARDWARE\key;..\HARDWARE\pwm;..\HARDWARE\rocker;..\HARDWARE\steer;..\HARDWARE\lcd;..\HARDWARE\touch;..\HARDWARE\24CXX;..\HARDWARE\IIC;..\HARDWARE\SDIO;..\HARDWARE\SPI;..\HARDWARE\SRAM;..\HARDWARE\W25QXX;..\HARDWARE\timer;..\HARDWARE\flash;..\USB\STM32_USB_OTG_Driver\inc;..\USB\STM32_USB_Device_Library\Core\inc;..\USB\STM32_USB_Device_Library\Class\msc\inc;..\USB\STM32_USB_HOST_Library\Core\inc;..\USB\STM32_USB_HOST_Library\Class\MSC\inc;..\USB\USB_APP;..\MALLOC;..\USMART;..\USB\STM32_USB_HOST_Library\Class\HID\inc;..\HARDWARE\keyboard;..\FATFS\src;..\FATFS\exfuns</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>

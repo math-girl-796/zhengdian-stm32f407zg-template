@@ -91,8 +91,8 @@ u8 flash_read_pid(char* filename, float* kp, float* ki, float* kd)
 	strcat(_filename, filename);
 	FIL *fil = (FIL*)mymalloc(SRAMIN,sizeof(FIL));
 	
-	u8 open_val;
-	
+	u8 open_val = 0;
+	open_val += 1; //avoid keil compiler warning
 	
 	//以读方式打开文件，如果成功返回1，如果失败返回0（失败通常是因为文件不存在）
 	if ((open_val = f_open(fil, (const TCHAR*)_filename, 1)) !=0)

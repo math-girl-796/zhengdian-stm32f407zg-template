@@ -12,7 +12,7 @@ static u32 TIM13_CH1_PWM_Cycle_us;
 void TIM13_CH1_PWM_Init_us(u32 us)
 {
 	TIM13_CH1_PWM_Cycle_us = us;
-	TIM13_CH1_PWM_Init(us, 84);
+	TIM13_CH1_PWM_Init(us-1, 84-1);
 }
 
 //参数：占空比（一个周期中高电平所占的比例）。范围0-1。
@@ -83,7 +83,7 @@ static u32 TIM14_CH1_PWM_Cycle_us;
 void TIM14_CH1_PWM_Init_us(u32 us)
 {
 	TIM14_CH1_PWM_Cycle_us = us;
-	TIM14_CH1_PWM_Init(us, 84);
+	TIM14_CH1_PWM_Init(us-1, 84-1);
 }
 
 //参数：占空比（一个周期中高电平所占的比例）。范围0-1。
