@@ -29,8 +29,44 @@ u8 mf_mount(u8* path,u8 mt)
 }
 //打开路径下的文件
 //path:路径+文件名
-//mode:打开模式[1：只读；2：只写；3：读写]
+//mode:打开模式[1：只读；2：只写；3：读写；4：创建]
+//只读：只能读，如果一直读，游标就一直向后走。
+//只写：将文件清空，然后往里面不断地写。写完必须关闭文件，不然就什么也不会写，之前的内容也不会删除
+//读写：读可以移动游标，写可以在游标处写。写进行的是覆盖操作而不是插入操作。
+
+/* 复制过来用来查看的 */
+//#define	FA_READ				0x01
+//#define	FA_OPEN_EXISTING	0x00
+//#define	FA_WRITE			0x02
+//#define	FA_CREATE_NEW		0x04
+//#define	FA_CREATE_ALWAYS	0x08
+//#define	FA_OPEN_ALWAYS		0x10
+//#define FA__WRITTEN			0x20
+//#define FA__DIRTY			0x40
+
 //返回值:执行结果
+//typedef enum { // 抄过来方便查看
+//	FR_OK = 0,				/* (0) Succeeded */
+//	FR_DISK_ERR,			/* (1) A hard error occurred in the low level disk I/O layer */
+//	FR_INT_ERR,				/* (2) Assertion failed */
+//	FR_NOT_READY,			/* (3) The physical drive cannot work */
+//	FR_NO_FILE,				/* (4) Could not find the file */
+//	FR_NO_PATH,				/* (5) Could not find the path */
+//	FR_INVALID_NAME,		/* (6) The path name format is invalid */
+//	FR_DENIED,				/* (7) Access denied due to prohibited access or directory full */
+//	FR_EXIST,				/* (8) Access denied due to prohibited access */
+//	FR_INVALID_OBJECT,		/* (9) The file/directory object is invalid */
+//	FR_WRITE_PROTECTED,		/* (10) The physical drive is write protected */
+//	FR_INVALID_DRIVE,		/* (11) The logical drive number is invalid */
+//	FR_NOT_ENABLED,			/* (12) The volume has no work area */
+//	FR_NO_FILESYSTEM,		/* (13) There is no valid FAT volume */
+//	FR_MKFS_ABORTED,		/* (14) The f_mkfs() aborted due to any parameter error */
+//	FR_TIMEOUT,				/* (15) Could not get a grant to access the volume within defined period */
+//	FR_LOCKED,				/* (16) The operation is rejected according to the file sharing policy */
+//	FR_NOT_ENOUGH_CORE,		/* (17) LFN working buffer could not be allocated */
+//	FR_TOO_MANY_OPEN_FILES,	/* (18) Number of open files > _FS_SHARE */
+//	FR_INVALID_PARAMETER	/* (19) Given parameter is invalid */
+//} FRESULT;
 u8 mf_open(u8*path,u8 mode)
 {
 	u8 res;	 

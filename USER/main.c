@@ -49,12 +49,12 @@ void test_fatfs(void);
 
 int main(void)
 {	
-	test_fatfs();
+	test_steer1_and_uart1();
 }
 
 void test_fatfs(void)
 {
-	 u32 total,free;
+//	u32 total,free;
 	u8 t=0;	
 	u8 res=0;	
 
@@ -74,16 +74,16 @@ void test_fatfs(void)
 	LCD_ShowString(30,90,200,16,16,"ATOM@ALIENTEK");
 	LCD_ShowString(30,110,200,16,16,"2014/5/15");   
 	LCD_ShowString(30,130,200,16,16,"Use USMART for test");	   
- 	while(SD_Init())//检测不到SD卡
-	{
-		LCD_ShowString(30,150,200,16,16,"SD Card Error!");
-		delay_ms(500);					
-		LCD_ShowString(30,150,200,16,16,"Please Check! ");
-		delay_ms(500);
-		led_switch(LED0);//DS0闪烁
-	}
+// 	while(SD_Init())//检测不到SD卡
+//	{
+//		LCD_ShowString(30,150,200,16,16,"SD Card Error!");
+//		delay_ms(500);					
+//		LCD_ShowString(30,150,200,16,16,"Please Check! ");
+//		delay_ms(500);
+//		led_switch(LED0);//DS0闪烁
+//	}
  	exfuns_init();							//为fatfs相关变量申请内存				 
-  	f_mount(fs[0],"0:",1); 					//挂载SD卡 
+//  	f_mount(fs[0],"0:",1); 					//挂载SD卡 
  	res=f_mount(fs[1],"1:",1); 				//挂载FLASH.	
 	if(res==0X0D)//FLASH磁盘,FAT文件系统错误,重新格式化FLASH
 	{
@@ -97,20 +97,20 @@ void test_fatfs(void)
 		delay_ms(1000);
 	}													    
 	LCD_Fill(30,150,240,150+16,WHITE);		//清除显示			  
-	while(exf_getfree((u8*)"0",&total,&free))	//得到SD卡的总容量和剩余容量
-	{
-		LCD_ShowString(30,150,200,16,16,"SD Card Fatfs Error!");
-		delay_ms(200);
-		LCD_Fill(30,150,240,150+16,WHITE);	//清除显示			  
-		delay_ms(200);
-		led_switch(LED0);//DS0闪烁
-	}													  			    
+//	while(exf_getfree((u8*)"0",&total,&free))	//得到SD卡的总容量和剩余容量
+//	{
+//		LCD_ShowString(30,150,200,16,16,"SD Card Fatfs Error!");
+//		delay_ms(200);
+//		LCD_Fill(30,150,240,150+16,WHITE);	//清除显示			  
+//		delay_ms(200);
+//		led_switch(LED0);//DS0闪烁
+//	}													  			    
  	POINT_COLOR=BLUE;//设置字体为蓝色	   
 	LCD_ShowString(30,150,200,16,16,"FATFS OK!");	 
-	LCD_ShowString(30,170,200,16,16,"SD Total Size:     MB");	 
-	LCD_ShowString(30,190,200,16,16,"SD  Free Size:     MB"); 	    
- 	LCD_ShowNum(30+8*14,170,total>>10,5,16);				//显示SD卡总容量 MB
- 	LCD_ShowNum(30+8*14,190,free>>10,5,16);					//显示SD卡剩余容量 MB			    
+//	LCD_ShowString(30,170,200,16,16,"SD Total Size:     MB");	 
+//	LCD_ShowString(30,190,200,16,16,"SD  Free Size:     MB"); 	    
+// 	LCD_ShowNum(30+8*14,170,total>>10,5,16);				//显示SD卡总容量 MB
+// 	LCD_ShowNum(30+8*14,190,free>>10,5,16);					//显示SD卡剩余容量 MB			    
 	while(1)
 	{
 		t++; 
@@ -681,26 +681,51 @@ void test_steer1_and_uart1(void) //使用前先配置TIM14_CH1_PWM管脚为PA7.电脑会不停
 	
 	while(1)
 	{
-		int len = uart1_buf_status();
-		if (len == 4)
-		{
-			uart1_read_buf(buf, 4);
-			temp_light_level = (buf[3] << 24) + (buf[2] << 16) + (buf[1] << 8) + buf[0];
-			light_level = temp_light_level;
-			printf("------------> SET HIGH VOLTAGE us in a cycle: %d\r\n", light_level);
-			steer1_set_compare(light_level);
-		}
-		else
-		{
-			uart1_clear_buf();
-		}
-		delay_ms(100);
-		hello_count++;
-		if (hello_count == 10)
-		{
-			printf("hello\r\n");
-			hello_count = 0;
-		}
+//		int len = uart1_buf_status();
+//		if (len == 4)
+//		{
+//			uart1_read_buf(buf, 4);
+//			temp_light_level = (buf[3] << 24) + (buf[2] << 16) + (buf[1] << 8) + buf[0];
+//			light_level = temp_light_level;
+//			printf("------------> SET HIGH VOLTAGE us in a cycle: %d\r\n", light_level);
+//			steer1_set_compare(light_level);
+//		}
+//		else
+//		{
+//			uart1_clear_buf();
+//		}
+//		delay_ms(100);
+//		hello_count++;
+//		if (hello_count == 10)
+//		{
+//			printf("hello\r\n");
+//			hello_count = 0;
+//		}
+		int a = 500;
+		steer1_set_compare(a);
+		delay_ms(1000);
+		led_switch(LED1);
+		
+		a = 1000;
+		steer1_set_compare(a);
+		delay_ms(1000);
+		led_switch(LED1);
+		
+		a = 1500;
+		steer1_set_compare(a);
+		delay_ms(1000);
+		led_switch(LED1);
+		
+		a = 2000;
+		steer1_set_compare(a);
+		delay_ms(1000);
+		led_switch(LED1);
+		
+		a = 2500;
+		steer1_set_compare(a);
+		delay_ms(1000);
+		led_switch(LED1);
+		
 	}
 }
 
