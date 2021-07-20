@@ -1,6 +1,6 @@
 #include "flash.h"
 
-void flash_init()
+u8 flash_init(void)
 {
 	u8 res;
 	
@@ -19,9 +19,11 @@ void flash_init()
 		{
 			f_setlabel((const TCHAR *)"1:ALIENTEK");	//设置Flash磁盘的名字为：ALIENTEK
 		}else 
-			led_blink3(LED0);	//格式化失败
+			led_blink5(LED0);	//格式化失败
 		delay_ms(1000);
+		return 0;
 	}		
+	return 1;
 }
 
 
@@ -32,38 +34,48 @@ u8 flash_write_pid(char* filename, float kp, float ki, float kd)
 	char _filename[40];
 	strcpy(_filename, "1:");
 	strcat(_filename, filename);
-	FIL *fil;
+	FIL *fil = (FIL*)mymalloc(SRAMIN,sizeof(FIL));
 	
+	u8 open_val;
 	//以写方式打开文件
-	//先查看文件是否存在，如果存在则备份并打开，如果不存在则创建并打开
-	if (f_open(fil, (const TCHAR*)_filename, 0) !=0)
+	//先查看文件是否存在，如果存在则打开，如果不存在则创建并打开
+	if ((open_val = f_open(fil, (const TCHAR*)_filename, 2)) !=0)
 	{
-		f_open(fil, (const TCHAR*)_filename, 7); // 创建文件，并以读写模式打开
+		open_val = f_open(fil, (const TCHAR*)_filename, 7); // 创建文件，并以读写模式打开
 	}
+	
+	if(open_val != 0) return 0;
 	
 	//以byte形式写入三个float
 	u32 ret_len;
-	u8 buf[6];
+	u8 buf[12];
 	byte_float bf;
 	
 	bf.f = kp;
-	buf[0] = bf.b[0];
-	buf[1] = bf.b[1];
+	buf[0] = bf.bytes.b0;
+	buf[1] = bf.bytes.b1;
+	buf[2] = bf.bytes.b2;
+	buf[3] = bf.bytes.b3;
 	
 	bf.f = ki;
-	buf[2] = bf.b[0];
-	buf[3] = bf.b[1];
+	buf[4] = bf.bytes.b0;
+	buf[5] = bf.bytes.b1;
+	buf[6] = bf.bytes.b2;
+	buf[7] = bf.bytes.b3;
 	
 	bf.f = kd;
-	buf[4] = bf.b[0];
-	buf[5] = bf.b[1];
+	buf[8] = bf.bytes.b0;
+	buf[9] = bf.bytes.b1;
+	buf[10] = bf.bytes.b2;
+	buf[11] = bf.bytes.b3;
 	
-	f_write(fil, buf, 6, &ret_len);
+	u8 ret_val = f_write(fil, buf, 12, &ret_len);
+	if (ret_val != 0) return 0;
 	
 	//关闭文件
 	f_close(fil);
 	
-	if (ret_len != 6) return 0;
+	if (ret_len != 12) return 0;
 	
 	return 1;
 }
@@ -77,35 +89,46 @@ u8 flash_read_pid(char* filename, float* kp, float* ki, float* kd)
 	char _filename[40];
 	strcpy(_filename, "1:");
 	strcat(_filename, filename);
-	FIL *fil;
+	FIL *fil = (FIL*)mymalloc(SRAMIN,sizeof(FIL));
+	
+	u8 open_val;
 	
 	
 	//以读方式打开文件，如果成功返回1，如果失败返回0（失败通常是因为文件不存在）
-	if (f_open(fil, (const TCHAR*)_filename, 1) !=0)
+	if ((open_val = f_open(fil, (const TCHAR*)_filename, 1)) !=0)
 	{
 		return 0;
 	}
 	
 	//以byte形式写入三个float
 	u32 ret_len;
-	u8 buf[6];
-	f_read(fil, buf, 6, &ret_len);
+	u8 buf[12];
+	
+	u8 ret_val = f_read(fil, buf, 12, &ret_len);
+	
+	if (ret_val != 0) return 0;
 	
 	byte_float bf;
 	
-	bf.b[0] = buf[0];
-	bf.b[1] = buf[1];
+	bf.bytes.b0 = buf[0];
+	bf.bytes.b1 = buf[1];	
+	bf.bytes.b2 = buf[2];
+	bf.bytes.b3 = buf[3];
 	*kp = bf.f;
 	
-	bf.b[0] = buf[2];
-	bf.b[1] = buf[3];
+	bf.bytes.b0 = buf[4];
+	bf.bytes.b1 = buf[5];	
+	bf.bytes.b2 = buf[6];
+	bf.bytes.b3 = buf[7];
 	*ki = bf.f;
 	
-	bf.b[0] = buf[4];
-	bf.b[1] = buf[5];
+	bf.bytes.b0 = buf[8];
+	bf.bytes.b1 = buf[9];	
+	bf.bytes.b2 = buf[10];
+	bf.bytes.b3 = buf[11];
 	*kd = bf.f;
 	
-	if (ret_len != 6) return 0;
+	if (ret_len != 12) return 0;
 	else
 	{
 		return 1;

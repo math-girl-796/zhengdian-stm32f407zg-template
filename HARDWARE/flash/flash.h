@@ -13,10 +13,17 @@
 typedef union 
 {
 	float f;
-	u8 b[2];
+	struct {
+		u8 b0;
+		u8 b1;
+		u8 b2;
+		u8 b3;
+	}bytes;
 } byte_float;
 
-
+u8 flash_init(void);
+u8 flash_write_pid(char* filename, float kp, float ki, float kd);
+u8 flash_read_pid(char* filename, float* kp, float* ki, float* kd);
 
 
 

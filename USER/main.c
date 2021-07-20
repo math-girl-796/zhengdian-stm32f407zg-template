@@ -20,6 +20,7 @@
 #include "usmart.h"
 #include "sram.h"  
 #include "keyboard.h"
+#include "flash.h"
 
 void test_uart1(void);
 void test_uart2(void);
@@ -46,11 +47,55 @@ void test_rocker(void);
 void test_keyboard(void);
 ///////////////////////////////
 void test_fatfs(void);
+void test_flash(void);
 
 int main(void)
 {	
-	test_steer1_and_uart1();
+	test_flash();
 }
+
+
+void test_flash(void)
+{
+	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);//设置系统中断优先级分组2
+	flash_init();
+	delay_init();
+	uart1_init(115200);
+	led_init();
+	float kp = 1.5f, ki = 3.0f, kd = 4.5f;
+	while(1)
+	{
+		kp += 0.1f; ki += 0.2f; kd += 0.3f;
+		int len;
+		if ((len = uart1_buf_status()) == 1)
+		{
+			u8 buf[1];
+			uart1_read_buf(buf, len);
+			if (buf[0] == 1)
+			{
+				u8 ret = flash_write_pid("pid", kp, ki, kd);
+				printf("write:\t%d\r\n", ret);
+			}
+			else if (buf[0] == 0)
+			{
+				u8 ret = flash_read_pid("pid", &kp, &ki, &kd);
+				printf("read:\t%d\r\n", ret);
+			}
+		}
+		printf("%f\t%f\t%f\t\r\n", kp, ki, kd);
+		led_switch(LED0);
+		delay_ms(200);
+	}
+//	flash_write_pid("pid", kp, ki, kd);
+//	flash_read_pid("pid", &kp, &ki, &kd);
+//	while(1)
+//	{
+//		led_switch(LED0);
+//		delay_ms(500);
+//	}
+}
+
+
 
 void test_fatfs(void)
 {
@@ -681,50 +726,50 @@ void test_steer1_and_uart1(void) //使用前先配置TIM14_CH1_PWM管脚为PA7.电脑会不停
 	
 	while(1)
 	{
-//		int len = uart1_buf_status();
-//		if (len == 4)
-//		{
-//			uart1_read_buf(buf, 4);
-//			temp_light_level = (buf[3] << 24) + (buf[2] << 16) + (buf[1] << 8) + buf[0];
-//			light_level = temp_light_level;
-//			printf("------------> SET HIGH VOLTAGE us in a cycle: %d\r\n", light_level);
-//			steer1_set_compare(light_level);
-//		}
-//		else
-//		{
-//			uart1_clear_buf();
-//		}
-//		delay_ms(100);
-//		hello_count++;
-//		if (hello_count == 10)
-//		{
-//			printf("hello\r\n");
-//			hello_count = 0;
-//		}
-		int a = 500;
-		steer1_set_compare(a);
-		delay_ms(1000);
-		led_switch(LED1);
-		
-		a = 1000;
-		steer1_set_compare(a);
-		delay_ms(1000);
-		led_switch(LED1);
-		
-		a = 1500;
-		steer1_set_compare(a);
-		delay_ms(1000);
-		led_switch(LED1);
-		
-		a = 2000;
-		steer1_set_compare(a);
-		delay_ms(1000);
-		led_switch(LED1);
-		
-		a = 2500;
-		steer1_set_compare(a);
-		delay_ms(1000);
-		led_switch(LED1);
+		int len = uart1_buf_status();
+		if (len == 4)
+		{
+			uart1_read_buf(buf, 4);
+			temp_light_level = (buf[3] << 24) + (buf[2] << 16) + (buf[1] << 8) + buf[0];
+			light_level = temp_light_level;
+			printf("------------> SET HIGH VOLTAGE us in a cycle: %d\r\n", light_level);
+			steer1_set_compare(light_level);
+		}
+		else
+		{
+			uart1_clear_buf();
+		}
+		delay_ms(100);
+		hello_count++;
+		if (hello_count == 10)
+		{
+			printf("hello\r\n");
+			hello_count = 0;
+		}
+//		int a = 500;
+//		steer1_set_compare(a);
+//		delay_ms(1000);
+//		led_switch(LED1);
+//		
+//		a = 1000;
+//		steer1_set_compare(a);
+//		delay_ms(1000);
+//		led_switch(LED1);
+//		
+//		a = 1500;
+//		steer1_set_compare(a);
+//		delay_ms(1000);
+//		led_switch(LED1);
+//		
+//		a = 2000;
+//		steer1_set_compare(a);
+//		delay_ms(1000);
+//		led_switch(LED1);
+//		
+//		a = 2500;
+//		steer1_set_compare(a);
+//		delay_ms(1000);
+//		led_switch(LED1);
 		
 	}
 }

@@ -7,6 +7,7 @@
 #include "sys.h" 	
 #include "w25qxx.h"  
 #include "fattester.h" 
+#include "flash.h"
 
 
 //函数名列表初始化(用户自己添加)
@@ -42,7 +43,10 @@ struct _m_usmart_nametab usmart_nametab[]=
 	(void*)mf_setlabel,"void mf_setlabel(u8 *path)", 
 	(void*)mf_gets,"void mf_gets(u16 size)", 
 	(void*)mf_putc,"u8 mf_putc(u8 c)", 
-	(void*)mf_puts,"u8 mf_puts(u8*c)", 		
+	(void*)mf_puts,"u8 mf_puts(u8*c)", 	
+	(void*)flash_init,"u8 flash_init(void)",
+	(void*)flash_write_pid,"u8 flash_write_pid(char* filename, float kp, float ki, float kd)",
+	(void*)flash_read_pid,"u8 flash_read_pid(char* filename, float* kp, float* ki, float* kd)",
 };						
 					  
 ///////////////////////////////////END///////////////////////////////////////////////
