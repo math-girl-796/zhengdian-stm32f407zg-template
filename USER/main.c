@@ -36,6 +36,7 @@ void test_pwm_TIM13_CH1(void);
 void test_pwm_TIM14_CH1(void);
 void test_pwm_and_uart1(void);
 void test_steer1_and_uart1(void); // 舵机
+void test_fun(void); //风扇
 void test_pid_camera_and_steer1(void);
 void test_parse_bytes_and_uart1(void);
 void test_lcd_show(void);
@@ -54,7 +55,25 @@ void test_timer5(void);
 
 int main(void)
 {	
-	test_timer5();
+	test_fun();
+}
+
+void test_fun(void)
+{
+	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);//设置系统中断优先级分组2
+	delay_init();
+	TIM12_CH2_PWM_Init_us(20000);
+	while(1)
+	{
+		TIM12_CH2_PWM_Set_Duration(1);
+		delay_ms(1000);
+		TIM12_CH2_PWM_Set_Duration(0.66);
+		delay_ms(1000);
+		TIM12_CH2_PWM_Set_Duration(0.33);
+		delay_ms(1000);
+		TIM12_CH2_PWM_Set_Duration(0);
+		delay_ms(1000);
+	}
 }
 
 void test_timer5(void)
