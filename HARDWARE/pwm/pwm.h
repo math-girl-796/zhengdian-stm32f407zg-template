@@ -5,7 +5,7 @@
 //激光发射器电压：5v
 //控制风扇可直接用pwm模块：占空比为1即为全速运行
 
-//TIM12_CH2可选管脚：PB15
+//TIM12_CH2可选管脚：PB15(可能被LCD占用)
 #define TIM12_CH2_PWM_GPIOx				GPIOB
 #define TIM12_CH2_PWM_GPIO_Pin			GPIO_Pin_15
 #define TIM12_CH2_PWM_GPIO_Pin_Source	GPIO_PinSource15

@@ -15,13 +15,37 @@
 //All rights reserved									  
 ////////////////////////////////////////////////////////////////////////////////// 	
 
+
+
+/*
+	使用方法
+		先直接调用MPU_Init
+		再在while循环中反复调用mpu_dmp_init()直到它返回0，这说明初始化成功了
+		然后就可以通过mpu_dmp_get_data(&pitch,&roll,&yaw)获取欧拉角数据了。这个函数返回0的时候说明执行成功
+*/
+
+
+
 //初始化MPU6050
 //返回值:0,成功
 //    其他,错误代码
 u8 MPU_Init(void)
 { 
 	u8 res;
+	
+// 这段是从精英板例程抄来的，和f4不兼容
+//	GPIO_InitTypeDef  GPIO_InitStructure
+//	RCC_APB2PeriphClockCmd(RCC_AHB1Periph_GPIOA,ENABLE);//先使能外设IO PORTA时钟 
+//	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_15;	 // 端口配置
+//	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF; 		 //推挽输出
+//	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP; 	
+//	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;		 //IO口速度为50MHz
+//	GPIO_Init(GPIOA, &GPIO_InitStructure);					 //根据设定参数初始化GPIOA
+//	GPIO_PinRemapConfig(GPIO_Remap_SWJ_JTAGDisable,ENABLE);
+//	MPU_AD0_CTRL=0;
+	
 	IIC_Init();//初始化IIC总线
+//	delay_ms(1000);
 	MPU_Write_Byte(MPU_PWR_MGMT1_REG,0X80);	//复位MPU6050
     delay_ms(100);
 	MPU_Write_Byte(MPU_PWR_MGMT1_REG,0X00);	//唤醒MPU6050 
@@ -33,6 +57,7 @@ u8 MPU_Init(void)
 	MPU_Write_Byte(MPU_FIFO_EN_REG,0X00);	//关闭FIFO
 	MPU_Write_Byte(MPU_INTBP_CFG_REG,0X80);	//INT引脚低电平有效
 	res=MPU_Read_Byte(MPU_DEVICE_ID_REG);
+	printf("器件ID：%d\r\n", res);
 	if(res==MPU_ADDR)//器件ID正确
 	{
 		MPU_Write_Byte(MPU_PWR_MGMT1_REG,0X01);	//设置CLKSEL,PLL X轴为参考

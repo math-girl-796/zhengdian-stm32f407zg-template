@@ -14,12 +14,16 @@
 //All rights reserved									  
 ////////////////////////////////////////////////////////////////////////////////// 	
 
+void TIM2_Int_Init(u16 arr,u16 psc);
+void TIM2_Int_Init_us(u16 us);
+
 void TIM3_Int_Init(u16 arr,u16 psc);
-void TIM3_Int_Init_us(u32 us);
+void TIM3_Int_Init_us(u16 us);
 
 /////// TIM4±ªusmart’º”√
 
+
 void TIM5_Int_Init(u16 arr,u16 psc);
-void TIM5_Int_Init_us(u32 us);
+void TIM5_Int_Init_us(u16 us);
 
 #endif

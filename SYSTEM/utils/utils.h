@@ -4,6 +4,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
+#include "timer.h"
 
 // 如果number是整数，则i与f相同；如果number是浮点数，则i是f的四舍五入整数；如果转换失败，返回0
 typedef struct
@@ -19,7 +20,8 @@ typedef struct
 // 第二次从uart缓冲区向主函数缓冲区buf读入1，由于没有对buf做更多处理，string是122，这就导致了错误
 number parse_string(char* string);
 
-
+void time_init(void);
+u32 get_time_ms(void);
 
 
 
