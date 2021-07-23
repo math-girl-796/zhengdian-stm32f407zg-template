@@ -191,7 +191,7 @@ void TIM2_IRQHandler(void)
 
 
 //定时器3中断服务函数
-void TIM3_IRQHandler(void)
+__weak void TIM3_IRQHandler(void)
 {
 	if(TIM_GetITStatus(TIM3,TIM_IT_Update)==SET) //溢出中断
 	{

@@ -16,7 +16,7 @@ struct obj
 	int y;
 } obj;
 
-struct
+struct prog_state
 {
 	u8 show_vision;
 } prog_state;
@@ -157,12 +157,18 @@ void loop(void)
 				prog_state.show_vision = 0;
 				printf("停止打印视觉信息\r\n");
 			}
+			//向k210发送信息
+			else if (strcmp(command, "k210") == 0)
+			{
+				char* k210_command = strtok(NULL, " ");
+				uart2_send_bytes((u8*)k210_command, strlen(k210_command));
+				printf("你发送的消息为：%s", k210_command);
+			}
 			else
 			{
 			ERR_CMD: 
 				printf("指令错误！\r\n");
 			}
-			
 		}
 		
 		
