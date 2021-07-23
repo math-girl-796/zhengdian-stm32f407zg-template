@@ -964,6 +964,51 @@ void test_pid_camera_and_steer1(void)
 	}
 }
 
+
+void test_steers(void)
+{
+	led_init();
+	delay_init();
+	
+	steer1_init();
+	steer2_init();
+	
+	while(1)
+	{
+		int a = 500;
+		steer1_set_compare(a);
+		steer2_set_compare(3000 - a);
+		delay_ms(1000);
+		led_switch(LED1);
+		
+		a = 1000;
+		steer1_set_compare(a);
+		steer2_set_compare(3000 - a);
+		delay_ms(1000);
+		led_switch(LED1);
+		
+		a = 1500;
+		steer1_set_compare(a);
+		steer2_set_compare(3000 - a);
+		delay_ms(1000);
+		led_switch(LED1);
+		
+		a = 2000;
+		steer1_set_compare(a);
+		steer2_set_compare(3000 - a);
+		delay_ms(1000);
+		led_switch(LED1);
+		
+		a = 2500;
+		steer1_set_compare(a);
+		steer2_set_compare(3000 - a);
+		delay_ms(1000);
+		led_switch(LED1);
+		
+	}
+}
+
+
 void test_steer1_and_uart1(void) //使用前先配置TIM14_CH1_PWM管脚为PA7.电脑会不停地收到hello。电脑给f4发0-20000的int型数据（两个字节），会改变pwm占空比，其他范围数据可能会导致出错
 	//有效范围为500-2500，表示0°-180°
 {
@@ -999,31 +1044,6 @@ void test_steer1_and_uart1(void) //使用前先配置TIM14_CH1_PWM管脚为PA7.电脑会不停
 			printf("hello\r\n");
 			hello_count = 0;
 		}
-//		int a = 500;
-//		steer1_set_compare(a);
-//		delay_ms(1000);
-//		led_switch(LED1);
-//		
-//		a = 1000;
-//		steer1_set_compare(a);
-//		delay_ms(1000);
-//		led_switch(LED1);
-//		
-//		a = 1500;
-//		steer1_set_compare(a);
-//		delay_ms(1000);
-//		led_switch(LED1);
-//		
-//		a = 2000;
-//		steer1_set_compare(a);
-//		delay_ms(1000);
-//		led_switch(LED1);
-//		
-//		a = 2500;
-//		steer1_set_compare(a);
-//		delay_ms(1000);
-//		led_switch(LED1);
-		
 	}
 }
 

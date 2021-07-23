@@ -36,8 +36,8 @@ def on_timer0(timer):
             x = (biggest_blob.x() + biggest_blob.w() // 2).to_bytes(2, "little")
             y = (biggest_blob.y() + biggest_blob.h() // 2).to_bytes(2, "little")
             uart_A.write(x + y + b'\x0d\x0a')
-            uart_A.write(y)
-            uart_A.write(b'\x0d\x0a')  # end of sentence
+            #uart_A.write(y)
+            #uart_A.write(b'\x0d\x0a')  # end of sentence
         else:
             print("None")
 

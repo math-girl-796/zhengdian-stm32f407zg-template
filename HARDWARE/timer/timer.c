@@ -33,8 +33,8 @@ void TIM2_Int_Init(u16 arr,u16 psc)
 	TIM_Cmd(TIM2,ENABLE); //使能定时器
 	
 	NVIC_InitStructure.NVIC_IRQChannel=TIM2_IRQn; //定时器中断
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority=0x01; //抢占优先级1
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority=0x03; //子优先级3
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority=0x00; //抢占优先级1
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority=0x00; //子优先级3
 	NVIC_InitStructure.NVIC_IRQChannelCmd=ENABLE;
 	NVIC_Init(&NVIC_InitStructure);
 	
@@ -179,7 +179,7 @@ void TIM5_Int_Stop(void)
 
 // 用于作系统计时，作为一个标尺判断程序运行时间
 //定时器中断服务函数
-extern u32 __ms_time_stamp;
+u32 __ms_time_stamp = 0;
 void TIM2_IRQHandler(void)
 {
 	if(TIM_GetITStatus(TIM2,TIM_IT_Update)==SET) //溢出中断

@@ -1,6 +1,7 @@
 #ifndef _TIMER_H
 #define _TIMER_H
 #include "sys.h"
+#include "math.h"
 //9g舵机电压：5v
 //激光发射器电压：5v
 //控制风扇可直接用pwm模块：占空比为1即为全速运行

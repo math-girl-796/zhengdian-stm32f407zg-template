@@ -62,6 +62,7 @@ void test_timer5(void);
 void test_mpu6050(void);
 void test_iic_24c02(void);
 void test_time(void);
+void test_steers(void);
 
 
 

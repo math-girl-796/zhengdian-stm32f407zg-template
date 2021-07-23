@@ -12,13 +12,35 @@ static u32 TIM12_CH2_PWM_Cycle_us;
 void TIM12_CH2_PWM_Init_us(u32 us)
 {
 	TIM12_CH2_PWM_Cycle_us = us;
-	TIM12_CH2_PWM_Init(us-1, 84-1);
+	if (us < 65535)
+	{	
+		TIM12_CH2_PWM_Init(us-1, 84-1);
+	}
+	else if (us < 655350)
+	{
+		TIM12_CH2_PWM_Init(round(us / 10.0f) - 1, 840 - 1);
+	}
+	else if (us < 6553500)
+	{
+		TIM12_CH2_PWM_Init(round(us / 100.0f) - 1, 8400 - 1);
+	}
 }
 
 //参数：占空比（一个周期中高电平所占的比例）。范围0-1。
 void TIM12_CH2_PWM_Set_Duration(float high_percentage)
 {
-	TIM_SetCompare2(TIM12, TIM12_CH2_PWM_Cycle_us * high_percentage);
+	if (TIM12_CH2_PWM_Cycle_us < 65535)
+	{	
+		TIM_SetCompare2(TIM12, TIM12_CH2_PWM_Cycle_us * high_percentage);
+	}
+	else if (TIM12_CH2_PWM_Cycle_us < 655350)
+	{
+		TIM_SetCompare2(TIM12, round(TIM12_CH2_PWM_Cycle_us / 10 - 1) * high_percentage);
+	}
+	else if (TIM12_CH2_PWM_Cycle_us < 6553500)
+	{
+		TIM_SetCompare2(TIM12, round(TIM12_CH2_PWM_Cycle_us / 100 - 1) * high_percentage);
+	}
 }
 
 //cmp越大，高电平占一个周期的比例越大
@@ -81,13 +103,35 @@ static u32 TIM13_CH1_PWM_Cycle_us;
 void TIM13_CH1_PWM_Init_us(u32 us)
 {
 	TIM13_CH1_PWM_Cycle_us = us;
-	TIM13_CH1_PWM_Init(us-1, 84-1);
+	if (us < 65535)
+	{	
+		TIM13_CH1_PWM_Init(us-1, 84-1);
+	}
+	else if (us < 655350)
+	{
+		TIM13_CH1_PWM_Init(round(us / 10.0f) - 1, 840 - 1);
+	}
+	else if (us < 6553500)
+	{
+		TIM13_CH1_PWM_Init(round(us / 100.0f) - 1, 8400 - 1);
+	}
 }
 
 //参数：占空比（一个周期中高电平所占的比例）。范围0-1。
 void TIM13_CH1_PWM_Set_Duration(float high_percentage)
 {
-	TIM_SetCompare1(TIM13, TIM13_CH1_PWM_Cycle_us * high_percentage);
+	if (TIM13_CH1_PWM_Cycle_us < 65535)
+	{	
+		TIM_SetCompare1(TIM13, TIM13_CH1_PWM_Cycle_us * high_percentage);
+	}
+	else if (TIM13_CH1_PWM_Cycle_us < 655350)
+	{
+		TIM_SetCompare1(TIM13, round(TIM13_CH1_PWM_Cycle_us / 10 - 1) * high_percentage);
+	}
+	else if (TIM13_CH1_PWM_Cycle_us < 6553500)
+	{
+		TIM_SetCompare1(TIM13, round(TIM13_CH1_PWM_Cycle_us / 100 - 1) * high_percentage);
+	}
 }
 
 //cmp越大，高电平占一个周期的比例越大
@@ -128,7 +172,7 @@ void TIM13_CH1_PWM_Init(u32 arr,u32 psc)
 	
 	TIM_TimeBaseInit(TIM13,&TIM_TimeBaseStructure);//初始化定时器
 	
-	//初始化TIM13 Channel1 PWM模式	 
+	//初始化TIM14 Channel1 PWM模式	 
 	TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1; //选择定时器模式:TIM脉冲宽度调制模式1
  	TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable; //比较输出使能
 	TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_High; //输出极性
@@ -152,13 +196,35 @@ static u32 TIM14_CH1_PWM_Cycle_us;
 void TIM14_CH1_PWM_Init_us(u32 us)
 {
 	TIM14_CH1_PWM_Cycle_us = us;
-	TIM14_CH1_PWM_Init(us-1, 84-1);
+	if (us < 65535)
+	{	
+		TIM14_CH1_PWM_Init(us-1, 84-1);
+	}
+	else if (us < 655350)
+	{
+		TIM14_CH1_PWM_Init(round(us / 10.0f) - 1, 840 - 1);
+	}
+	else if (us < 6553500)
+	{
+		TIM14_CH1_PWM_Init(round(us / 100.0f) - 1, 8400 - 1);
+	}
 }
 
 //参数：占空比（一个周期中高电平所占的比例）。范围0-1。
 void TIM14_CH1_PWM_Set_Duration(float high_percentage)
 {
-	TIM_SetCompare1(TIM14, TIM14_CH1_PWM_Cycle_us * high_percentage);
+	if (TIM14_CH1_PWM_Cycle_us < 65535)
+	{	
+		TIM_SetCompare1(TIM14, TIM14_CH1_PWM_Cycle_us * high_percentage);
+	}
+	else if (TIM14_CH1_PWM_Cycle_us < 655350)
+	{
+		TIM_SetCompare1(TIM14, round(TIM14_CH1_PWM_Cycle_us / 10 - 1) * high_percentage);
+	}
+	else if (TIM14_CH1_PWM_Cycle_us < 6553500)
+	{
+		TIM_SetCompare1(TIM14, round(TIM14_CH1_PWM_Cycle_us / 100 - 1) * high_percentage);
+	}
 }
 
 //cmp越大，高电平占一个周期的比例越大
@@ -181,7 +247,7 @@ void TIM14_CH1_PWM_Init(u32 arr,u32 psc)
 	TIM_OCInitTypeDef  TIM_OCInitStructure;
 	
 	TIM14_SELF_RCC_FUN(TIM14_SELF_RCC_ADDR, ENABLE);  	//TIM14时钟使能    
-	TIM14_CH1_PWM_GPIO_RCC_FUN(TIM14_CH1_PWM_GPIO_RCC_ADDR, ENABLE); 	//使能PORTF时钟	
+	TIM14_CH1_PWM_GPIO_RCC_FUN(TIM14_CH1_PWM_GPIO_RCC_ADDR, ENABLE); 	//使能PORT时钟	
 	
 	GPIO_PinAFConfig(TIM14_CH1_PWM_GPIOx,TIM14_CH1_PWM_GPIO_Pin_Source,GPIO_AF_TIM14); //GPIOF9复用为定时器14
 	

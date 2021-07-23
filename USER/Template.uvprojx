@@ -335,7 +335,7 @@
               <MiscControls></MiscControls>
               <Define>STM32F40_41xxx,USE_STDPERIPH_DRIVER,USE_USB_OTG_FS</Define>
               <Undefine></Undefine>
-              <IncludePath>..\CORE;..\SYSTEM\delay;..\SYSTEM\sys;..\SYSTEM\usart;..\SYSTEM\utils;..\USER;..\FWLIB\inc;..\HARDWARE\led;..\HARDWARE\step_motor;..\HARDWARE\key;..\HARDWARE\pwm;..\HARDWARE\rocker;..\HARDWARE\steer;..\HARDWARE\lcd;..\HARDWARE\touch;..\HARDWARE\24CXX;..\HARDWARE\SDIO;..\HARDWARE\SPI;..\HARDWARE\SRAM;..\HARDWARE\W25QXX;..\HARDWARE\timer;..\HARDWARE\flash;..\HARDWARE\IIC;..\HARDWARE\mpu6050\eMPL;..\HARDWARE\mpu6050;..\HARDWARE\keyboard;..\USB\STM32_USB_OTG_Driver\inc;..\USB\STM32_USB_Device_Library\Core\inc;..\USB\STM32_USB_Device_Library\Class\msc\inc;..\USB\STM32_USB_HOST_Library\Core\inc;..\USB\STM32_USB_HOST_Library\Class\MSC\inc;..\USB\USB_APP;..\MALLOC;..\USMART;..\USB\STM32_USB_HOST_Library\Class\HID\inc;..\FATFS\src;..\FATFS\exfuns</IncludePath>
+              <IncludePath>..\CORE;..\SYSTEM\delay;..\SYSTEM\sys;..\SYSTEM\usart;..\SYSTEM\utils;..\USER;..\FWLIB\inc;..\HARDWARE\led;..\HARDWARE\step_motor;..\HARDWARE\key;..\HARDWARE\pwm;..\HARDWARE\rocker;..\HARDWARE\steer;..\HARDWARE\lcd;..\HARDWARE\touch;..\HARDWARE\24CXX;..\HARDWARE\SDIO;..\HARDWARE\SPI;..\HARDWARE\SRAM;..\HARDWARE\W25QXX;..\HARDWARE\timer;..\HARDWARE\flash;..\HARDWARE\IIC;..\HARDWARE\mpu6050\eMPL;..\HARDWARE\mpu6050;..\HARDWARE\keyboard;..\USB\STM32_USB_OTG_Driver\inc;..\USB\STM32_USB_Device_Library\Core\inc;..\USB\STM32_USB_Device_Library\Class\msc\inc;..\USB\STM32_USB_HOST_Library\Core\inc;..\USB\STM32_USB_HOST_Library\Class\MSC\inc;..\USB\USB_APP;..\MALLOC;..\USMART;..\USB\STM32_USB_HOST_Library\Class\HID\inc;..\FATFS\src;..\FATFS\exfuns;..\TEST;..\USER</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -385,6 +385,11 @@
               <FilePath>.\main.c</FilePath>
             </File>
             <File>
+              <FileName>control.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\control.c</FilePath>
+            </File>
+            <File>
               <FileName>stm32f4xx_it.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\stm32f4xx_it.c</FilePath>
@@ -393,6 +398,231 @@
               <FileName>system_stm32f4xx.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\system_stm32f4xx.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>SYSTEM</GroupName>
+          <Files>
+            <File>
+              <FileName>delay.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\SYSTEM\delay\delay.c</FilePath>
+            </File>
+            <File>
+              <FileName>sys.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\SYSTEM\sys\sys.c</FilePath>
+            </File>
+            <File>
+              <FileName>usart.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\SYSTEM\usart\usart.c</FilePath>
+            </File>
+            <File>
+              <FileName>utils.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\SYSTEM\utils\utils.c</FilePath>
+            </File>
+            <File>
+              <FileName>ctiic.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\HARDWARE\touch\ctiic.c</FilePath>
+            </File>
+            <File>
+              <FileName>ft5206.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\HARDWARE\touch\ft5206.c</FilePath>
+            </File>
+            <File>
+              <FileName>gt9147.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\HARDWARE\touch\gt9147.c</FilePath>
+            </File>
+            <File>
+              <FileName>ott2001a.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\HARDWARE\touch\ott2001a.c</FilePath>
+            </File>
+            <File>
+              <FileName>sdio_sdcard.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\HARDWARE\SDIO\sdio_sdcard.c</FilePath>
+            </File>
+            <File>
+              <FileName>spi.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\HARDWARE\SPI\spi.c</FilePath>
+            </File>
+            <File>
+              <FileName>sram.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\HARDWARE\SRAM\sram.c</FilePath>
+            </File>
+            <File>
+              <FileName>w25qxx.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\HARDWARE\W25QXX\w25qxx.c</FilePath>
+            </File>
+            <File>
+              <FileName>24cxx.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\HARDWARE\24CXX\24cxx.c</FilePath>
+            </File>
+            <File>
+              <FileName>myiic.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\HARDWARE\IIC\myiic.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>HARDWARE</GroupName>
+          <Files>
+            <File>
+              <FileName>led.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\HARDWARE\led\led.c</FilePath>
+            </File>
+            <File>
+              <FileName>stepper_motor.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\HARDWARE\step_motor\stepper_motor.c</FilePath>
+            </File>
+            <File>
+              <FileName>key.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\HARDWARE\key\key.c</FilePath>
+            </File>
+            <File>
+              <FileName>pwm.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\HARDWARE\pwm\pwm.c</FilePath>
+            </File>
+            <File>
+              <FileName>rocker.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\HARDWARE\rocker\rocker.c</FilePath>
+            </File>
+            <File>
+              <FileName>steer.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\HARDWARE\steer\steer.c</FilePath>
+            </File>
+            <File>
+              <FileName>lcd.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\HARDWARE\lcd\lcd.c</FilePath>
+            </File>
+            <File>
+              <FileName>touch.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\HARDWARE\touch\touch.c</FilePath>
+            </File>
+            <File>
+              <FileName>keyboard.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\HARDWARE\keyboard\keyboard.c</FilePath>
+            </File>
+            <File>
+              <FileName>flash.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\HARDWARE\flash\flash.c</FilePath>
+            </File>
+            <File>
+              <FileName>timer.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\HARDWARE\timer\timer.c</FilePath>
+            </File>
+            <File>
+              <FileName>mpu6050.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\HARDWARE\mpu6050\mpu6050.c</FilePath>
+            </File>
+            <File>
+              <FileName>inv_mpu.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\HARDWARE\mpu6050\eMPL\inv_mpu.c</FilePath>
+            </File>
+            <File>
+              <FileName>inv_mpu_dmp_motion_driver.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\HARDWARE\mpu6050\eMPL\inv_mpu_dmp_motion_driver.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>USB_APP</GroupName>
+          <Files>
+            <File>
+              <FileName>usbh_usr.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\USB\USB_APP\usbh_usr.c</FilePath>
+            </File>
+            <File>
+              <FileName>usb_bsp.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\USB\USB_APP\usb_bsp.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>TEST</GroupName>
+          <Files>
+            <File>
+              <FileName>test.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\TEST\test.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>USMART</GroupName>
+          <Files>
+            <File>
+              <FileName>usmart.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\USMART\usmart.c</FilePath>
+            </File>
+            <File>
+              <FileName>usmart_config.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\USMART\usmart_config.c</FilePath>
+            </File>
+            <File>
+              <FileName>usmart_str.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\USMART\usmart_str.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>FATFS</GroupName>
+          <Files>
+            <File>
+              <FileName>diskio.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\FATFS\src\diskio.c</FilePath>
+            </File>
+            <File>
+              <FileName>ff.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\FATFS\src\ff.c</FilePath>
+            </File>
+            <File>
+              <FileName>cc936.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\FATFS\src\option\cc936.c</FilePath>
+            </File>
+            <File>
+              <FileName>exfuns.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\FATFS\exfuns\exfuns.c</FilePath>
+            </File>
+            <File>
+              <FileName>fattester.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\FATFS\exfuns\fattester.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -587,81 +817,6 @@
           </Files>
         </Group>
         <Group>
-          <GroupName>SYSTEM</GroupName>
-          <Files>
-            <File>
-              <FileName>delay.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\SYSTEM\delay\delay.c</FilePath>
-            </File>
-            <File>
-              <FileName>sys.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\SYSTEM\sys\sys.c</FilePath>
-            </File>
-            <File>
-              <FileName>usart.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\SYSTEM\usart\usart.c</FilePath>
-            </File>
-            <File>
-              <FileName>utils.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\SYSTEM\utils\utils.c</FilePath>
-            </File>
-            <File>
-              <FileName>ctiic.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\HARDWARE\touch\ctiic.c</FilePath>
-            </File>
-            <File>
-              <FileName>ft5206.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\HARDWARE\touch\ft5206.c</FilePath>
-            </File>
-            <File>
-              <FileName>gt9147.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\HARDWARE\touch\gt9147.c</FilePath>
-            </File>
-            <File>
-              <FileName>ott2001a.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\HARDWARE\touch\ott2001a.c</FilePath>
-            </File>
-            <File>
-              <FileName>sdio_sdcard.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\HARDWARE\SDIO\sdio_sdcard.c</FilePath>
-            </File>
-            <File>
-              <FileName>spi.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\HARDWARE\SPI\spi.c</FilePath>
-            </File>
-            <File>
-              <FileName>sram.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\HARDWARE\SRAM\sram.c</FilePath>
-            </File>
-            <File>
-              <FileName>w25qxx.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\HARDWARE\W25QXX\w25qxx.c</FilePath>
-            </File>
-            <File>
-              <FileName>24cxx.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\HARDWARE\24CXX\24cxx.c</FilePath>
-            </File>
-            <File>
-              <FileName>myiic.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\HARDWARE\IIC\myiic.c</FilePath>
-            </File>
-          </Files>
-        </Group>
-        <Group>
           <GroupName>README</GroupName>
           <Files>
             <File>
@@ -672,77 +827,12 @@
           </Files>
         </Group>
         <Group>
-          <GroupName>HARDWARE</GroupName>
+          <GroupName>MALLOC</GroupName>
           <Files>
             <File>
-              <FileName>led.c</FileName>
+              <FileName>malloc.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\HARDWARE\led\led.c</FilePath>
-            </File>
-            <File>
-              <FileName>stepper_motor.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\HARDWARE\step_motor\stepper_motor.c</FilePath>
-            </File>
-            <File>
-              <FileName>key.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\HARDWARE\key\key.c</FilePath>
-            </File>
-            <File>
-              <FileName>pwm.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\HARDWARE\pwm\pwm.c</FilePath>
-            </File>
-            <File>
-              <FileName>rocker.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\HARDWARE\rocker\rocker.c</FilePath>
-            </File>
-            <File>
-              <FileName>steer.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\HARDWARE\steer\steer.c</FilePath>
-            </File>
-            <File>
-              <FileName>lcd.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\HARDWARE\lcd\lcd.c</FilePath>
-            </File>
-            <File>
-              <FileName>touch.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\HARDWARE\touch\touch.c</FilePath>
-            </File>
-            <File>
-              <FileName>keyboard.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\HARDWARE\keyboard\keyboard.c</FilePath>
-            </File>
-            <File>
-              <FileName>flash.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\HARDWARE\flash\flash.c</FilePath>
-            </File>
-            <File>
-              <FileName>timer.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\HARDWARE\timer\timer.c</FilePath>
-            </File>
-            <File>
-              <FileName>mpu6050.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\HARDWARE\mpu6050\mpu6050.c</FilePath>
-            </File>
-            <File>
-              <FileName>inv_mpu.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\HARDWARE\mpu6050\eMPL\inv_mpu.c</FilePath>
-            </File>
-            <File>
-              <FileName>inv_mpu_dmp_motion_driver.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\HARDWARE\mpu6050\eMPL\inv_mpu_dmp_motion_driver.c</FilePath>
+              <FilePath>..\MALLOC\malloc.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -763,21 +853,6 @@
               <FileName>usb_hcd_int.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\USB\STM32_USB_OTG_Driver\src\usb_hcd_int.c</FilePath>
-            </File>
-          </Files>
-        </Group>
-        <Group>
-          <GroupName>USB_APP</GroupName>
-          <Files>
-            <File>
-              <FileName>usbh_usr.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\USB\USB_APP\usbh_usr.c</FilePath>
-            </File>
-            <File>
-              <FileName>usb_bsp.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\USB\USB_APP\usb_bsp.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -833,66 +908,6 @@
               <FileName>usbh_hid_mouse.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\USB\STM32_USB_HOST_Library\Class\HID\src\usbh_hid_mouse.c</FilePath>
-            </File>
-          </Files>
-        </Group>
-        <Group>
-          <GroupName>MALLOC</GroupName>
-          <Files>
-            <File>
-              <FileName>malloc.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\MALLOC\malloc.c</FilePath>
-            </File>
-          </Files>
-        </Group>
-        <Group>
-          <GroupName>USMART</GroupName>
-          <Files>
-            <File>
-              <FileName>usmart.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\USMART\usmart.c</FilePath>
-            </File>
-            <File>
-              <FileName>usmart_config.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\USMART\usmart_config.c</FilePath>
-            </File>
-            <File>
-              <FileName>usmart_str.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\USMART\usmart_str.c</FilePath>
-            </File>
-          </Files>
-        </Group>
-        <Group>
-          <GroupName>FATFS</GroupName>
-          <Files>
-            <File>
-              <FileName>diskio.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\FATFS\src\diskio.c</FilePath>
-            </File>
-            <File>
-              <FileName>ff.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\FATFS\src\ff.c</FilePath>
-            </File>
-            <File>
-              <FileName>cc936.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\FATFS\src\option\cc936.c</FilePath>
-            </File>
-            <File>
-              <FileName>exfuns.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\FATFS\exfuns\exfuns.c</FilePath>
-            </File>
-            <File>
-              <FileName>fattester.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\FATFS\exfuns\fattester.c</FilePath>
             </File>
           </Files>
         </Group>
