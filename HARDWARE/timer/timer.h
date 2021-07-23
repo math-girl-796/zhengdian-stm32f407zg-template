@@ -1,6 +1,7 @@
 #ifndef __TIMER_H
 #define __TIMER_H
 #include "sys.h"
+#include <math.h>
 //////////////////////////////////////////////////////////////////////////////////	 
 //本程序只供学习使用，未经作者许可，不得用于其它任何用途
 //ALIENTEK STM32F407开发板
@@ -15,15 +16,22 @@
 ////////////////////////////////////////////////////////////////////////////////// 	
 
 void TIM2_Int_Init(u16 arr,u16 psc);
-void TIM2_Int_Init_us(u16 us);
+void TIM2_Int_Init_us(u32 us);
+void TIM2_Int_Stop(void);
 
 void TIM3_Int_Init(u16 arr,u16 psc);
-void TIM3_Int_Init_us(u16 us);
+void TIM3_Int_Init_us(u32 us); // us 在65536以下是准确的，再高的话会被截断一点. 最多6553500
+void TIM3_Int_Stop(void);
 
 /////// TIM4被usmart占用
 
 
 void TIM5_Int_Init(u16 arr,u16 psc);
-void TIM5_Int_Init_us(u16 us);
+void TIM5_Int_Init_us(u32 us);
+void TIM5_Int_Stop(void);
 
 #endif
+
+
+
+

@@ -57,13 +57,14 @@ void keyboard_init(void) 					// 初始化键盘
 }
 
 
+//该函数必须以较高频率调用，因为它要高速扫描，以处理usb事件
 void keyboard_check(void) 
 {
 	USBH_Process(&USB_OTG_Core_dev, &USB_Host);
 	/* 连接建立，通信异常 */
 	if (bDeviceState==1 && USBH_Check_HIDCommDead(&USB_OTG_Core_dev,&HID_Machine))
 	{
-		led_switch(LED0);
+		led_blink1(LED0);
 		delay_ms(20);
 		USBH_HID_Reconnect();//重连
 		keyboard_check();
@@ -71,7 +72,7 @@ void keyboard_check(void)
 	/* 连接未建立，USB HOST枚举死机 */
 	else if (bDeviceState==0 && USBH_Check_EnumeDead(&USB_Host)) 
 	{
-		led_switch(LED0);
+		led_blink1(LED0);
 		delay_ms(20);
 		USBH_HID_Reconnect();//重连
 		keyboard_check();

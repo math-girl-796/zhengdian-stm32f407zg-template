@@ -24,7 +24,7 @@
 #define IIC_SDA_GPIO_PIN	GPIO_Pin_5
    	   		  
 			  
-//IO方向设置
+//IO方向设置               //!!!!!  注意，修改管脚要将下面的x*2中的x改为sda的管脚  !!!!!//
 #define SDA_IN()  {IIC_SDA_GPIO->MODER&=~(3<<(5*2));IIC_SDA_GPIO->MODER|=0<<5*2;}	//输入模式
 #define SDA_OUT() {IIC_SDA_GPIO->MODER&=~(3<<(5*2));IIC_SDA_GPIO->MODER|=1<<5*2;} //输出模式
 //IO操作函数	 

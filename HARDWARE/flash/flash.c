@@ -135,6 +135,89 @@ u8 flash_read_pid(char* filename, float* kp, float* ki, float* kd)
 	}
 }
 
+//向文件中写入cycle数据，写入会覆盖原本文件中的内容。写入成功返回1，写入失败返回0
+u8 flash_write_cycle(char* filename, u32 cycle)
+{
+	//确定要读写的文件名
+	char _filename[40];
+	strcpy(_filename, "1:");
+	strcat(_filename, filename);
+	FIL *fil = (FIL*)mymalloc(SRAMIN,sizeof(FIL));
+	
+	u8 open_val;
+	//以写方式打开文件
+	//先查看文件是否存在，如果存在则打开，如果不存在则创建并打开
+	if ((open_val = f_open(fil, (const TCHAR*)_filename, 2)) !=0)
+	{
+		open_val = f_open(fil, (const TCHAR*)_filename, 7); // 创建文件，并以读写模式打开
+	}
+	
+	if(open_val != 0) return 0;
+	
+	//以byte形式写入一个u32
+	u32 ret_len;
+	u8 buf[4];
+	byte_u32 bu;
+	
+	bu.u = cycle;
+	buf[0] = bu.bytes.b0;
+	buf[1] = bu.bytes.b1;
+	buf[2] = bu.bytes.b2;
+	buf[3] = bu.bytes.b3;
+	
+	u8 ret_val = f_write(fil, buf, 4, &ret_len);
+	if (ret_val != 0) return 0;
+	
+	//关闭文件
+	f_close(fil);
+	
+	if (ret_len != 4) return 0;
+	
+	return 1;
+}
+
+
+//将存在于对应文件的cycle数据写入传入的后三个参数中
+//返回读取情况：1-成功，0-失败
+u8 flash_read_cycle(char* filename, u32* cycle)
+{
+	//确定要读写的文件名
+	char _filename[40];
+	strcpy(_filename, "1:");
+	strcat(_filename, filename);
+	FIL *fil = (FIL*)mymalloc(SRAMIN,sizeof(FIL));
+	
+	u8 open_val = 0;
+	open_val += 1; //avoid keil compiler warning
+	
+	//以读方式打开文件，如果成功返回1，如果失败返回0（失败通常是因为文件不存在）
+	if ((open_val = f_open(fil, (const TCHAR*)_filename, 1)) !=0)
+	{
+		return 0;
+	}
+	
+	//以byte形式读出一个u32
+	u32 ret_len;
+	u8 buf[4];
+	
+	u8 ret_val = f_read(fil, buf, 4, &ret_len);
+	
+	if (ret_val != 0) return 0;
+	
+	byte_u32 bu;
+	
+	bu.bytes.b0 = buf[0];
+	bu.bytes.b1 = buf[1];	
+	bu.bytes.b2 = buf[2];
+	bu.bytes.b3 = buf[3];
+	*cycle = bu.u;
+	
+	if (ret_len != 4) return 0;
+	else
+	{
+		return 1;
+	}
+}
 
 
 

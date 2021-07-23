@@ -53,14 +53,14 @@ void uart1_clear_buf(void);							// 清空串口接收缓冲区
 #define USART2_REC_LEN  		200  	//定义最大接收字节数。如果一次收到的数据总量超过此数，缓冲区将被清空
 #define EN_USART2_RX 			1		//使能（1）/禁止（0）串口1接收
 
-#define UART2_GPIOx			GPIOD					// 修改管脚只需修改左侧GPIOx的x，以及管脚数字
-#define UART2_Pin_TX		GPIO_Pin_5
-#define UART2_Pin_RX		GPIO_Pin_6
-#define UART2_PinSource_TX	GPIO_PinSource5
-#define UART2_PinSource_RX	GPIO_PinSource6
+#define UART2_GPIOx			GPIOA					// 修改管脚只需修改左侧GPIOx的x，以及管脚数字
+#define UART2_Pin_TX		GPIO_Pin_2
+#define UART2_Pin_RX		GPIO_Pin_3
+#define UART2_PinSource_TX	GPIO_PinSource2
+#define UART2_PinSource_RX	GPIO_PinSource3
 
 #define UART2_GPIO_RCC_FUN	RCC_AHB1PeriphClockCmd
-#define UART2_GPIO_RCC_ADDR	RCC_AHB1Periph_GPIOD
+#define UART2_GPIO_RCC_ADDR	RCC_AHB1Periph_GPIOA
 #define UART2_SELF_RCC_FUN	RCC_APB1PeriphClockCmd
 #define UART2_SELF_RCC_ADDR	RCC_APB1Periph_USART2
 

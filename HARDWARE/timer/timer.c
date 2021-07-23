@@ -40,10 +40,29 @@ void TIM2_Int_Init(u16 arr,u16 psc)
 	
 }
 
-void TIM2_Int_Init_us(u16 us)
+void TIM2_Int_Init_us(u32 us)
 {
-	TIM2_Int_Init(us-1, 84-1);
+	if (us < 65535)
+	{	
+		TIM2_Int_Init(us-1, 84-1);
+	}
+	else if (us < 655350)
+	{
+		TIM2_Int_Init(round(us / 10.0f) - 1, 840 - 1);
+	}
+	else if (us < 6553500)
+	{
+		TIM2_Int_Init(round(us / 100.0f) - 1, 8400 - 1);
+	}
 }
+
+void TIM2_Int_Stop(void)
+{
+	TIM_ITConfig(TIM2,TIM_IT_Update,DISABLE);
+}
+
+
+/**********************************************************************************/
 
 
 //通用定时器3中断初始化
@@ -77,14 +96,30 @@ void TIM3_Int_Init(u16 arr,u16 psc)
 	
 }
 
-void TIM3_Int_Init_us(u16 us)
+void TIM3_Int_Init_us(u32 us)
 {
-	TIM3_Int_Init(us-1, 84-1);
+	if (us < 65535)
+	{	
+		TIM3_Int_Init(us-1, 84-1);
+	}
+	else if (us < 655350)
+	{
+		TIM3_Int_Init(round(us / 10.0f) - 1, 840 - 1);
+	}
+	else if (us < 6553500)
+	{
+		TIM3_Int_Init(round(us / 100.0f) - 1, 8400 - 1);
+	}
+}
+
+void TIM3_Int_Stop(void)
+{
+	TIM_ITConfig(TIM3,TIM_IT_Update,DISABLE);
 }
 
 /************************************************************************************/
 
-
+/////// TIM4被usmart占用
 
 /************************************************************************************/
 
@@ -113,9 +148,25 @@ void TIM5_Int_Init(u16 arr,u16 psc)
 	
 }
 
-void TIM5_Int_Init_us(u16 us)
+void TIM5_Int_Init_us(u32 us)
 {
-	TIM5_Int_Init(us-1, 84-1);
+	if (us < 65535)
+	{	
+		TIM5_Int_Init(us-1, 84-1);
+	}
+	else if (us < 655350)
+	{
+		TIM5_Int_Init(round(us / 10.0f) - 1, 840 - 1);
+	}
+	else if (us < 6553500)
+	{
+		TIM5_Int_Init(round(us / 100.0f) - 1, 8400 - 1);
+	}
+}
+
+void TIM5_Int_Stop(void)
+{
+	TIM_ITConfig(TIM5,TIM_IT_Update,DISABLE);
 }
 /*****************************************************************************************************************************/
 /*****************************************************************************************************************************/
