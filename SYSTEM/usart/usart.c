@@ -252,39 +252,39 @@ void uart2_init(u32 bound){
 	#endif
 }
 
-void USART2_IRQHandler(void)                	//中断服务程序
-{
-	u8 Res;
-	#if SYSTEM_SUPPORT_OS 		//如果SYSTEM_SUPPORT_OS为真，则需要支持OS.
-	OSIntEnter();    
-	#endif
-	if(USART_GetITStatus(USART2, USART_IT_RXNE) != RESET)  //接收中断(接收到的数据必须是0x0d 0x0a结尾)
-	{
-		Res = USART_ReceiveData(USART2);//读取接收到的数据(1bit)
-		
-		if((USART2_RX_STA&0x8000)==0)//接收未完成
-		{
-			if(USART2_RX_STA&0x4000)//接收到了0x0d
-			{
-				if(Res!=0x0a)USART2_RX_STA=0;//接收错误,重新开始
-				else USART2_RX_STA|=0x8000;	//接收完成了 
-			}
-			else //还没收到0X0D
-			{	
-				if(Res==0x0d)USART2_RX_STA|=0x4000;
-				else
-				{
-					USART2_RX_BUF[USART2_RX_STA&0X3FFF]=Res ;
-					USART2_RX_STA++;
-					if(USART2_RX_STA>(USART2_REC_LEN-1))USART2_RX_STA=0;//接收数据错误,重新开始接收	  
-				}	
-			}
-		}   		 
-	} 
-	#if SYSTEM_SUPPORT_OS 	//如果SYSTEM_SUPPORT_OS为真，则需要支持OS.
-	OSIntExit();  											 
-	#endif
-} 
+//void USART2_IRQHandler(void)                	//中断服务程序
+//{
+//	u8 Res;
+//	#if SYSTEM_SUPPORT_OS 		//如果SYSTEM_SUPPORT_OS为真，则需要支持OS.
+//	OSIntEnter();    
+//	#endif
+//	if(USART_GetITStatus(USART2, USART_IT_RXNE) != RESET)  //接收中断(接收到的数据必须是0x0d 0x0a结尾)
+//	{
+//		Res = USART_ReceiveData(USART2);//读取接收到的数据(1bit)
+//		printf("%02x\r\n", Res);
+//		if((USART2_RX_STA&0x8000)==0)//接收未完成
+//		{
+//			if(USART2_RX_STA&0x4000)//接收到了0x0d
+//			{
+//				if(Res!=0x0a)USART2_RX_STA=0;//接收错误,重新开始
+//				else USART2_RX_STA|=0x8000;	//接收完成了 
+//			}
+//			else //还没收到0X0D
+//			{	
+//				if(Res==0x0d)USART2_RX_STA|=0x4000;
+//				else
+//				{
+//					USART2_RX_BUF[USART2_RX_STA&0X3FFF]=Res ;
+//					USART2_RX_STA++;
+//					if(USART2_RX_STA>(USART2_REC_LEN-1))USART2_RX_STA=0;//接收数据错误,重新开始接收	  
+//				}	
+//			}
+//		}   		 
+//	} 
+//	#if SYSTEM_SUPPORT_OS 	//如果SYSTEM_SUPPORT_OS为真，则需要支持OS.
+//	OSIntExit();  											 
+//	#endif
+//} 
 #endif	
 /*************************************************************************************************************************************************************/
 

@@ -44,6 +44,8 @@ void TIM3_IRQHandler(void)
 		steer2_set_compare(clip_500_2500(steer_compare.y));
 		
 		delay_ms(15);
+		
+		led_switch(LED1);
 				
 		
 		//记录中断处理函数所用时间

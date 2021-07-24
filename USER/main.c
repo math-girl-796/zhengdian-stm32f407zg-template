@@ -213,24 +213,7 @@ void loop(void)
 
 		
 		/* 收到一条来自uart2的信息 */
-		int uart2_len = uart2_buf_status();
-		if (uart2_len == 4)
-		{
-			u8 buf[4];
-			//读取摄像头数据
-			uart2_read_buf(buf, 4);
-			obj.x = (buf[1] << 8) + buf[0];
-			obj.y = (buf[3] << 8) + buf[2];
-			
-			if(prog_state.show_vision) printf("收到视觉数据：centor_x - %d\tcentor_y - %d\r\n", obj.x, obj.y);
-		}
-		else if (uart2_len > 4) 
-		{
-			printf("视觉数据格式有误！\r\n");
-			uart2_clear_buf();
-		}
-		
-		last_loop_ms = get_time_ms() - loop_start_ms;
+		if(prog_state.show_vision) printf("收到视觉数据：centor_x - %d\tcentor_y - %d\r\n", obj.x, obj.y);
 	}
 }
 
@@ -246,4 +229,28 @@ void print_param(void)
 	printf("存储器中参数：kp1: %f\tki1: %f\tkd1: %f\tcycle: %d\r\n\
               kp2: %f\tki2: %f\tkd2: %f\r\n",  pid1.kp, pid1.ki, pid1.kd, ctrl_cycle, pid2.kp, pid2.ki, pid2.kd);
 }
+
+
+extern u16 USART2_RX_STA;
+extern u8 USART2_RX_BUF[USART2_REC_LEN]; 
+void USART2_IRQHandler(void)                	//中断服务程序
+{
+	static uint8_t rebuf[8]={0},i=0;
+	
+	if(USART_GetITStatus(USART2,USART_IT_RXNE) != RESET)
+	{
+		rebuf[i++]=USART_ReceiveData(USART2);	
+		if(rebuf[0]!=0xb3)//帧头
+			i=0;
+		else if((i==2)&&(rebuf[1]!=0xb3))//判断帧头
+			i=0;
+		else if(i>=6)//代表一帧数据完毕
+		{
+			memcpy(&obj,&rebuf[2], 4);
+			i = 0;
+		}
+		USART_ClearFlag(USART2,USART_FLAG_RXNE);
+	}
+} 
+
 

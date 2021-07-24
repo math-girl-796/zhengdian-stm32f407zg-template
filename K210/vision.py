@@ -1,6 +1,6 @@
 from fpioa_manager import fm
 from machine import UART, Timer
-from utime import sleep_ms
+from utime import sleep_ms, sleep_us
 import sensor
 import lcd
 from Maix import GPIO
@@ -30,20 +30,19 @@ def on_timer0(timer):
         if biggest_blob is not None:
             #在图片上画方块，在IDE显示图片和提示信息
             #img.draw_rectangle(biggest_blob[0:4])
-            print(biggest_blob)
+            #print(biggest_blob)
             #lcd.display(img)  # 这个语句会花费大量时间，导致帧率降到20以下
             #通过串口1发送色块中心坐标
-            x = (biggest_blob.x() + biggest_blob.w() // 2).to_bytes(2, "little")
-            y = (biggest_blob.y() + biggest_blob.h() // 2).to_bytes(2, "little")
-            uart_A.write(x + y + b'\x0d\x0a')
-            uart_A.write(y)
-            uart_A.write(b'\x0d\x0a')  # end of sentence
+            uart_A.write(bytearray([0xb3, 0xb3]))
+            x = (biggest_blob.x() + biggest_blob.w() // 2).to_bytes(2, 'little')
+            y = (biggest_blob.y() + biggest_blob.h() // 2).to_bytes(2, 'little')
+            uart_A.write(x + y)
         else:
             print("None")
 
         # 打印帧率
-        print(clock.fps())
-        clock.tick()
+        #print(clock.fps())
+        #clock.tick()
 
 
 ############################################################# 主程序 #################################################################
