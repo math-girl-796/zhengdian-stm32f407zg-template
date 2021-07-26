@@ -28,9 +28,19 @@ u32 clip_500_2500(u32 input)
 	else return input;
 }
 
+u32 clip_500_1500(u32 input)
+{
+	if (input > 1500) return 1500;
+	else if (input < 500) return 500;
+	else return input;
+}
 
-
-
+u32 clip_1500_2500(u32 input)
+{
+	if (input > 2500) return 2500;
+	else if (input < 1500) return 1500;
+	else return input;
+}
 
 
 

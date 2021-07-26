@@ -41,6 +41,7 @@ void init(void)
 	time_init(); // 在TIM2上启动以ms为单位的时钟
 	steer1_init();
 	steer2_init();
+	lcd_init();
 	
 	// 初始化一些数值
 	prog_state.show_vision = 0;
@@ -53,7 +54,7 @@ void init(void)
 	flash_read_pid("pid2", &pid2.kp, &pid2.ki, &pid2.kd); // 恢复pid参数
 	flash_read_cycle("cycle", &ctrl_cycle); // 恢复参数
 	steer1_set_compare(1000);
-	steer2_set_compare(1000);
+	steer2_set_compare(2000);
 	UART2_TIMEOUT = 500;
 }
 
@@ -195,6 +196,53 @@ void loop(void)
 				prog_state.show_vision = 0;
 				printf("停止打印视觉信息\r\n");
 			}
+			else if (strcmp(command, "skx") == 0 || strcmp(command, "shakex") == 0)
+			{
+				steer1_set_compare(500);
+				delay_ms(500);
+				steer1_set_compare(1500);
+				delay_ms(500);
+				steer1_set_compare(1000);
+			}
+			else if (strcmp(command, "sky") == 0 || strcmp(command, "shakey") == 0)
+			{
+				steer2_set_compare(2500);
+				delay_ms(500);
+				steer2_set_compare(1500);
+				delay_ms(500);
+				steer2_set_compare(2000);
+				
+			}
+			else if (strcmp(command, "sk") == 0 || strcmp(command, "shake") == 0)
+			{
+				steer1_set_compare(500);
+				delay_ms(200);
+				steer2_set_compare(2500);
+				delay_ms(500);
+				steer1_set_compare(1500);
+				delay_ms(200);
+				steer2_set_compare(1500);
+				delay_ms(500);
+				steer1_set_compare(1000);
+				delay_ms(200);
+				steer2_set_compare(2000);
+			}
+			else if (strcmp(command, "dj") == 0 || strcmp(command, "steer") == 0)
+			{ 
+				int which = parse_string(strtok(NULL, " ")).i;
+				int compare = parse_string(strtok(NULL, " ")).i;
+				if (which == 1) steer1_set_compare(compare);
+				if (which == 2) steer2_set_compare(compare);
+			}
+			else if (strcmp(command, "lcd") == 0)
+			{ 
+				lcd_init();
+			}
+			else if (strcmp(command, "stpshvs") == 0 || strcmp(command, "stopshowvision") == 0)
+			{
+				prog_state.show_vision = 0;
+				printf("停止打印视觉信息\r\n");
+			}
 			//向k210发送信息
 			else if (strcmp(command, "k210") == 0)
 			{
@@ -213,7 +261,13 @@ void loop(void)
 
 		
 		/* 收到一条来自uart2的信息 */
-		if(prog_state.show_vision) printf("收到视觉数据：centor_x - %d\tcentor_y - %d\r\n", obj.x, obj.y);
+		if(prog_state.show_vision)
+		{
+			printf("收到视觉数据：centor_x - %d\tcentor_y - %d\r\n", obj.x, obj.y);
+			char buf[25];
+			sprintf(buf, "球坐标：(%d, %d)", obj.x, obj.y);
+			LCD_ShowString(0,32,240,16,16,buf);
+		}
 	}
 }
 
@@ -231,22 +285,33 @@ void print_param(void)
 }
 
 
+// k210 uart协议：[0xb3, 0xb3, cmd, data * 8]
+// cmd: 0x01-数据，0x02-信息
 extern u16 USART2_RX_STA;
 extern u8 USART2_RX_BUF[USART2_REC_LEN]; 
 void USART2_IRQHandler(void)                	//中断服务程序
 {
-	static uint8_t rebuf[8]={0},i=0;
+	static uint8_t rebuf[20]={0},i=0;
 	
 	if(USART_GetITStatus(USART2,USART_IT_RXNE) != RESET)
 	{
-		rebuf[i++]=USART_ReceiveData(USART2);	
+		rebuf[i++]=USART_ReceiveData(USART2);
+		
 		if(rebuf[0]!=0xb3)//帧头
 			i=0;
 		else if((i==2)&&(rebuf[1]!=0xb3))//判断帧头
 			i=0;
-		else if(i>=6)//代表一帧数据完毕
+		else if(i>=11)//代表一帧数据完毕
 		{
-			memcpy(&obj,&rebuf[2], 4);
+			if (rebuf[2] == 0x01) // 数据帧
+			{
+				memcpy(&obj,&rebuf[3], 4);
+			}
+			else  // 信息帧
+			{
+				rebuf[19] = 0; //确保字符串有正常的结尾
+				printf("%s", &rebuf[3]);
+			}
 			i = 0;
 		}
 		USART_ClearFlag(USART2,USART_FLAG_RXNE);

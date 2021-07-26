@@ -194,7 +194,9 @@ void USBH_USR_DeviceNotSupported(void)
 USBH_USR_Status USBH_USR_UserInput(void)
 { 
 	printf("跳过用户确认步骤!\r\n");
+	LCD_ShowString(0,16,240,16,16,"连接成功");
 	bDeviceState=1;//USB设备已经连接成功
+	
 	return USBH_USR_RESP_OK;
 } 
 //USB接口电流过载
@@ -206,6 +208,7 @@ void USBH_USR_OverCurrentDetected (void)
 void USBH_USR_DeInit(void)
 {
 	printf("重新初始化!!!\r\n");
+	LCD_ShowString(0,16,240,16,16,"usb连接中");
 }
 //无法恢复的错误!!  
 void USBH_USR_UnrecoveredError (void)
@@ -334,21 +337,16 @@ void USR_MOUSE_ProcessData(HID_MOUSE_Data_TypeDef *data)
 //data:USB键盘输入内容
 void  USR_KEYBRD_ProcessData (uint8_t data)
 { 
-//	static u16 endx,endy;
-
-//	u8 buf[4];
+	static u16 endx,endy;
+	
 	if(USB_FIRST_PLUGIN_FLAG)//第一次插入,将数据清零
 	{
 		USB_FIRST_PLUGIN_FLAG=0;
-//		endx=((lcddev.width-30)/8)*8+30;		//得到endx值
-//		endy=((lcddev.height-220)/16)*16+220;	//得到endy值
-//		maxinputchar=((lcddev.width-30)/8);
-//		maxinputchar*=(lcddev.height-220)/16;	//当前LCD最大可以显示的字符数.
+		endx=240;		//得到endx值
+		endy=16;	//得到endy值
 		keyboard_buf_pos = 0;
-	}
-//	POINT_COLOR=BLUE;
-//	sprintf((char*)buf,"%02X",data);
-//	LCD_ShowString(30+56,180,200,16,16,(char*)buf);//显示键值	 
+	} 
+	
 	if(data>=' ' && data<='~' && keyboard_buf_pos < KEYBOARD_BUF_MAX_LEN)
 	{
 		tbuf[keyboard_buf_pos++]=data;
@@ -363,11 +361,22 @@ void  USR_KEYBRD_ProcessData (uint8_t data)
 	{
 		LF_FLAG = 1;
 	}
-//	if(keyboard_buf_pos<=KEYBOARD_BUF_MAX_LEN)	//没有超过显示区
-//	{
-//		LCD_Fill(30,220,endx,endy,WHITE);
-//		LCD_ShowString(30,220,endx-30,endy-220,16,(char*)tbuf);
-//	}		
+	
+	if(keyboard_buf_pos<=KEYBOARD_BUF_MAX_LEN)	//没有超过显示区
+	{
+		if(data>=' ' && data<='~' && keyboard_buf_pos < KEYBOARD_BUF_MAX_LEN)
+		{
+			LCD_Fill(0, 0,endx,endy,WHITE);		
+			LCD_ShowString(0,0,endx,endy,16,(char*)tbuf);
+		}else if(data==0X0D)	//退格键
+		{
+			LCD_Fill(0, 0,endx,endy,WHITE);		
+			LCD_ShowString(0,0,endx,endy,16,(char*)tbuf);
+		} else if (data == 0X0A)
+		{
+			LCD_Fill(0, 0,endx,endy,WHITE);	
+		}
+	}		
 	//printf("KEY Board Value:%02X\r\n",data);
 	//printf("KEY Board Char:%c\r\n",data); 
 }

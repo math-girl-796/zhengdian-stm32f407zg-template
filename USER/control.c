@@ -40,10 +40,8 @@ void TIM3_IRQHandler(void)
 		steer_compare.x += derta_compare1;
 		steer_compare.y += derta_compare2;
 		
-		steer1_set_compare(clip_500_2500(steer_compare.x));
-		steer2_set_compare(clip_500_2500(steer_compare.y));
-		
-		delay_ms(15);
+		steer1_set_compare(clip_500_1500(steer_compare.x));
+		steer2_set_compare(clip_1500_2500(steer_compare.y));
 		
 		led_switch(LED1);
 				
