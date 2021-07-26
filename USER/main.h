@@ -11,8 +11,8 @@
 
 typedef struct 
 {
-	u16 x;
-	u16 y;
+	int16_t x;
+	int16_t y;
 }coord;
 
 struct prog_state

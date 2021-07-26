@@ -37,11 +37,15 @@ void TIM3_IRQHandler(void)
 		int derta_compare1 = (int) (pid1.kp * err.x + pid1.kd * derr.x + pid1.ki * ierr.x);
 		int derta_compare2 = (int) (pid2.kp * err.y + pid2.kd * derr.y + pid2.ki * ierr.y);
 		
-		steer_compare.x += derta_compare1;
-		steer_compare.y += derta_compare2;
+		steer_compare.x = clip_1500_2500(steer_compare.x + derta_compare1);
+		steer_compare.y = clip_500_1500(steer_compare.y + derta_compare2);
 		
-		steer1_set_compare(clip_500_1500(steer_compare.x));
-		steer2_set_compare(clip_1500_2500(steer_compare.y));
+//		printf("tgt: %d  %d    obj: %d  %d\r\n", tgt.x, tgt.y, obj.x, obj.y);
+//		printf("derta_compare: %d  %d\r\n", derta_compare1, derta_compare2);
+//		printf("err: %d  %d\r\n compare: %d %d\r\n", err.x, err.y, steer_compare.x, steer_compare.y);
+		
+		steer1_set_compare(steer_compare.y);
+		steer2_set_compare(steer_compare.x);
 		
 		led_switch(LED1);
 				

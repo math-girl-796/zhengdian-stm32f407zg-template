@@ -26,7 +26,7 @@ u32 get_time_ms(void);
 u32 clip_500_2500(u32 input);
 u32 clip_500_1500(u32 input);
 u32 clip_1500_2500(u32 input);
-
+u32 clip(u32 min, u32 max, u32 input);
 
 
 

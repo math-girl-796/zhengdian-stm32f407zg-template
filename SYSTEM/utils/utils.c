@@ -42,7 +42,12 @@ u32 clip_1500_2500(u32 input)
 	else return input;
 }
 
-
+u32 clip(u32 min, u32 max, u32 input)
+{
+	if (input > max) return max;
+	else if (input < min) return min;
+	else return input;
+}
 
 
 

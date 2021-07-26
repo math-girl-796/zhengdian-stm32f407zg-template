@@ -264,7 +264,11 @@ void loop(void)
 			}
 		}
 		
-		
+		if (key1_state() == 1)
+		{
+			delay_ms(10);
+			TIM3_Int_Stop();
+		}
 
 		
 		/* 打印全局变量中obj的坐标 */

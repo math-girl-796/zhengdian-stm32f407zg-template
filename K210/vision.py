@@ -33,20 +33,26 @@ def on_timer0(timer):
     #找色块
     blobs = img.find_blobs([my_threshold], roi=roi)
     biggest_blob = find_biggest_blob(blobs)
-    if biggest_blob is not None:
-        #在图片上画方块，在IDE显示图片和提示信息
-        if shvs:
+    #在图片上画方块，在IDE显示图片和提示信息
+    if shvs:
+        if biggest_blob is not None:
             img.draw_rectangle(biggest_blob[0:4]) # 画碰撞箱
-            img.draw_string(2,2, ("fps:  %2.1f" %(fps)), color=str_color, scale=2) # 画帧率
-            img.draw_string(2,22,("roi:  %d %d %d %d" %(roi[0], roi[1], roi[2], roi[3])), color=str_color, scale=2) # 画roi
-            img.draw_string(2,42,("thres:%d %d" %(my_threshold[0], my_threshold[1])), color=str_color, scale=2) # 画roi
-            img.draw_string(2,62,("negate: " + str(negate)), color=str_color, scale=2) # 画roi
-            #print(biggest_blob)
-            lcd.display(img)  # 这个语句会花费大量时间，导致帧率降到20以下
+        img.draw_string(2,2, ("fps:  %2.1f" %(fps)), color=str_color, scale=str_scale) # 画帧率
+        img.draw_string(2,22,("roi:  %d %d %d %d" %(roi[0], roi[1], roi[2], roi[3])), color=str_color, scale=str_scale) # 画roi
+        img.draw_rectangle(roi) # 画roi
+        img.draw_string(2,42,("thres:%d %d" %(my_threshold[0], my_threshold[1])), color=str_color, scale=str_scale) # 画
+        img.draw_string(2,62,("negate: " + str(negate)), color=str_color, scale=str_scale) # 画
+        #print(biggest_blob)
+        lcd.display(img)  # 这个语句会花费大量时间，导致帧率降到20以下
+    if biggest_blob is not None:
         #通过串口1发送色块中心坐标
+        objx = biggest_blob.x() + biggest_blob.w() // 2
+        objy = biggest_blob.y() + biggest_blob.h() // 2
         uart_A.write(bytearray([0xb3, 0xb3, 0x01])) # 帧头  指令帧
-        x = (biggest_blob.x() + biggest_blob.w() // 2).to_bytes(2, 'little')
-        y = (biggest_blob.y() + biggest_blob.h() // 2).to_bytes(2, 'little')
+        x = (objx).to_bytes(2, 'little')
+        y = (objy).to_bytes(2, 'little')
+        if shvs:
+            img.draw_string(2,82,("obj: %d %d" % (objx, objy)), color=str_color, scale=str_scale) # 画
         uart_A.write(x + y)
     else:
         #print("None")
@@ -77,12 +83,14 @@ def save_parametors():
 def load_parametors():
     file_object = open('./k210_pm.txt', 'r')
     try:
+        global roi, my_threshold, ovfps, negate
         strs = file_object.read().split()
         print("读取到：", strs)
         roi = [int(_) for _ in strs[0:4]]
         my_threshold = [int(_) for _ in strs[4:6]]
         ovfps = int(strs[6])
-        negate = bool(strs[7])
+        negate = True if str[7] == "True" else False
+        print(roi, my_threshold, ovfps, negate)
     except:
         print("打开文件失败")
     finally:
@@ -104,6 +112,8 @@ sensor.set_framesize(sensor.QVGA)
 #############################################
 sensor.run(1)
 sensor.skip_frames()
+sensor.set_hmirror(0) # 开启水平镜像
+sensor.set_vflip(0)  # 设置垂直翻转
 
 
 # 全局变量
@@ -114,6 +124,9 @@ ovfps = 10
 key_flag = False
 negate = False
 str_color = (238, 252, 58) # img.draw_string 颜色
+str_scale = 2
+# 加载参数
+load_parametors()
 
 # 打印初始变量
 print("当前目录:", uos.getcwd())  # 文件系统
@@ -143,6 +156,8 @@ clock = time.clock()  # 获得一个钟表对象
 # 可能初始化lcd
 if shvs == True:
     my_lcd_init()
+
+
 
 # 初始化定时器对象，并且启动
 # 40hz
@@ -196,6 +211,7 @@ while True:
                 save_parametors()
             elif f4_command == "ldpm":
                 load_parametors()
+                tim.restart()
             elif f4_command.startswith("thres"):
                 cmds = f4_command.split(',')
                 try:
