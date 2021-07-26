@@ -6,7 +6,6 @@ u32 ctrl_cycle;    // 控制中断周期（单位us）
 u32 last_ctrl_ms;  // 上次中断处理函数运行时间
 u32 last_loop_ms;  // 上次主循环用时（单位ms）
 u16 camera_width, camera_height; // 相机处理图像像素范围
-u32 UART2_TIMEOUT;
 coord err;
 coord ierr;
 coord derr;
@@ -42,6 +41,8 @@ void init(void)
 	steer1_init();
 	steer2_init();
 	lcd_init();
+	LCD_ShowString(0,16,240,16,16,"usb connect successfully"); // 防止usb连接好了，lcd还没初始化。如果usb连接失败，这些文字自然会被覆盖。
+	LCD_Show_Msg("here is message area");
 	
 	// 初始化一些数值
 	prog_state.show_vision = 0;
@@ -55,7 +56,6 @@ void init(void)
 	flash_read_cycle("cycle", &ctrl_cycle); // 恢复参数
 	steer1_set_compare(1000);
 	steer2_set_compare(2000);
-	UART2_TIMEOUT = 500;
 }
 
 void loop(void)
@@ -133,11 +133,13 @@ void loop(void)
 				else 
 					goto ERR_CMD;
 				printf("开始控制！\r\n");
+				LCD_Show_Msg("start control");
 			}
 			else if (strcmp(command, "stop") == 0 || strcmp(command, "stopcontrol") == 0)
 			{
 				TIM3_Int_Stop();
 				printf("停止控制！\r\n");
+				LCD_Show_Msg("stop control");
 			}
 			else if (strcmp(command, "kp1") == 0 || strcmp(command, "setkp1") == 0)
 			{
@@ -181,40 +183,42 @@ void loop(void)
 				tgt.y = parse_string(strtok(NULL, " ")).i;
 				print_param();
 			}
-			else if (strcmp(command, "u2t") == 0 || strcmp(command, "setuart2timeout") == 0)
-			{
-				UART2_TIMEOUT = parse_string(strtok(NULL, " ")).i;
-				print_param();
-			}
 			else if (strcmp(command, "shvs") == 0 || strcmp(command, "showvision") == 0)
 			{
 				prog_state.show_vision = 1;
 				printf("开始打印视觉信息\r\n");
+				LCD_Show_Msg("printing vision info");
 			}
 			else if (strcmp(command, "stpshvs") == 0 || strcmp(command, "stopshowvision") == 0)
 			{
 				prog_state.show_vision = 0;
 				printf("停止打印视觉信息\r\n");
+				LCD_Show_Msg("stop print vision info");
 			}
-			else if (strcmp(command, "skx") == 0 || strcmp(command, "shakex") == 0)
+			else if (strcmp(command, "sk1") == 0 || strcmp(command, "shake1") == 0)
 			{
+				printf("摇晃舵机1\r\n");
+				LCD_Show_Msg("shake steer 1");
 				steer1_set_compare(500);
 				delay_ms(500);
 				steer1_set_compare(1500);
 				delay_ms(500);
 				steer1_set_compare(1000);
 			}
-			else if (strcmp(command, "sky") == 0 || strcmp(command, "shakey") == 0)
+			else if (strcmp(command, "sk2") == 0 || strcmp(command, "shake2") == 0)
 			{
+				printf("摇晃舵机2\r\n");
+				LCD_Show_Msg("shake steer 2");
 				steer2_set_compare(2500);
 				delay_ms(500);
 				steer2_set_compare(1500);
 				delay_ms(500);
 				steer2_set_compare(2000);
-				
 			}
 			else if (strcmp(command, "sk") == 0 || strcmp(command, "shake") == 0)
 			{
+				printf("摇晃舵机\r\n");
+				LCD_Show_Msg("shake steer");
 				steer1_set_compare(500);
 				delay_ms(200);
 				steer2_set_compare(2500);
@@ -233,15 +237,14 @@ void loop(void)
 				int compare = parse_string(strtok(NULL, " ")).i;
 				if (which == 1) steer1_set_compare(compare);
 				if (which == 2) steer2_set_compare(compare);
+				printf("设置舵机%d compare = %d\r\n", which, compare);
+				char buf[50];
+				sprintf(buf, "set steer%d compare = %d", which, compare);
+				LCD_Show_Msg(buf);
 			}
 			else if (strcmp(command, "lcd") == 0)
 			{ 
 				lcd_init();
-			}
-			else if (strcmp(command, "stpshvs") == 0 || strcmp(command, "stopshowvision") == 0)
-			{
-				prog_state.show_vision = 0;
-				printf("停止打印视觉信息\r\n");
 			}
 			//向k210发送信息
 			else if (strcmp(command, "k210") == 0)
@@ -249,32 +252,41 @@ void loop(void)
 				char* k210_command = strtok(NULL, " ");
 				uart2_send_bytes((u8*)k210_command, strlen(k210_command));
 				printf("你发送的消息为：%s\r\n", k210_command);
+				char buf[85];
+				sprintf(buf, "send to k210: %s", k210_command);
+				LCD_Show_Msg(buf);
 			}
 			else
 			{
 			ERR_CMD: 
 				printf("指令错误！\r\n");
+				LCD_Show_Msg("illegal command!");
 			}
 		}
 		
 		
 
 		
-		/* 收到一条来自uart2的信息 */
+		/* 打印全局变量中obj的坐标 */
 		if(prog_state.show_vision)
 		{
 			printf("收到视觉数据：centor_x - %d\tcentor_y - %d\r\n", obj.x, obj.y);
 			char buf[25];
-			sprintf(buf, "球坐标：(%d, %d)", obj.x, obj.y);
+			sprintf(buf, "obj pos: (%d, %d)", obj.x, obj.y);
+			LCD_Fill(0, 32,240,48,WHITE);	
 			LCD_ShowString(0,32,240,16,16,buf);
 		}
 	}
 }
 
+// 在串口和lcd打印参数信息
 void print_param(void)
 {
 	printf("当前参数：    kp1: %f\tki1: %f\tkd1: %f\tcycle: %d\t\r\n\
               kp2: %f\tki2: %f\tkd2: %f\t目标点(%d, %d)\r\n", pid1.kp, pid1.ki, pid1.kd, ctrl_cycle, pid2.kp, pid2.ki, pid2.kd, tgt.x, tgt.y);
+	char buf1[200];
+	sprintf(buf1, "pm:kp1:%f ki1:%f kd1:%f cycle:%d kp2:%f ki2:%f kd2:%f target(%d,%d)", pid1.kp, pid1.ki, pid1.kd, ctrl_cycle, pid2.kp, pid2.ki, pid2.kd, tgt.x, tgt.y);
+	
 	pid pid1, pid2;
 	u32 ctrl_cycle = 0;
 	flash_read_pid("pid1", &pid1.kp, &pid1.ki, &pid1.kd); 
@@ -282,6 +294,9 @@ void print_param(void)
 	flash_read_cycle("cycle", &ctrl_cycle);
 	printf("存储器中参数：kp1: %f\tki1: %f\tkd1: %f\tcycle: %d\r\n\
               kp2: %f\tki2: %f\tkd2: %f\r\n",  pid1.kp, pid1.ki, pid1.kd, ctrl_cycle, pid2.kp, pid2.ki, pid2.kd);
+	char buf2[200];
+	sprintf(buf2, "%s saved_pm:kp1:%f ki1:%f kd1:%f cycle:%d kp2:%f ki2:%f kd2:%f", buf1, pid1.kp, pid1.ki, pid1.kd, ctrl_cycle, pid2.kp, pid2.ki, pid2.kd);
+	LCD_Show_Msg(buf2);
 }
 
 

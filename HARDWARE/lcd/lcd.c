@@ -2864,7 +2864,7 @@ void LCD_ShowxNum(u16 x,u16 y,u32 num,u8 len,u8 size,u8 mode)
 	 	LCD_ShowChar(x+(size/2)*t,y,temp+'0',size,mode&0X01); 
 	}
 } 
-//显示字符串
+//显示字符串          !!只能用英文字母和数字
 //x,y:起点坐标
 //width,height:区域大小  
 //size:字体大小
@@ -2884,7 +2884,15 @@ void LCD_ShowString(u16 x,u16 y,u16 width,u16 height,u8 size,char *p)
     }  
 }
 
-
+// 在lcd特定位置打印消息：从第四行开始，共展示5行
+void LCD_Show_Msg(char* msg) // 只改starty就能改初始位置
+{
+	#define LCD_SHOW_MSG_START_Y 48
+	#define LCD_SHOW_MSG_LINE_NUM 8	
+	u16 endy = LCD_SHOW_MSG_LINE_NUM * 16 + LCD_SHOW_MSG_START_Y;
+	LCD_Fill(0, LCD_SHOW_MSG_START_Y,240,endy,WHITE);	
+	LCD_ShowString(0,LCD_SHOW_MSG_START_Y,240, LCD_SHOW_MSG_LINE_NUM * 16,16,msg);
+}
 
 
 
