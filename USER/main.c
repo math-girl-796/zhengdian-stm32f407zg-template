@@ -1,18 +1,21 @@
 #include "main.h"
 
-pid pid1;
-pid pid2;
+pid pid1, pid2;
+pid spid1, spid2;
 u32 ctrl_cycle;    // 控制中断周期（单位us）
 u32 last_ctrl_ms;  // 上次中断处理函数运行时间
 u32 last_loop_ms;  // 上次主循环用时（单位ms）
 u16 camera_width, camera_height; // 相机处理图像像素范围
-coord err;
-coord ierr;
-coord derr;
-coord lerr; // last_error
+
+coord err, ierr, derr, lerr;
+coord serr, sierr, sderr, slerr, sllerr;
 coord steer_compare;
 
-coord obj, tgt;
+int16_t InLim = 0; // 积分限幅
+int16_t InSep = 0; // 积分分离
+
+coord obj, lobj, tgt;
+coord sobj, slobj, stgt;
 struct prog_state prog_state;
 
 int main(void)
@@ -53,6 +56,8 @@ void init(void)
 	tgt.y = camera_height / 2;
 	flash_read_pid("pid1", &pid1.kp, &pid1.ki, &pid1.kd); // 恢复pid参数
 	flash_read_pid("pid2", &pid2.kp, &pid2.ki, &pid2.kd); // 恢复pid参数
+	flash_read_pid("spid1", &spid1.kp, &spid1.ki, &spid1.kd);  // 恢复pid参数
+	flash_read_pid("spid2", &spid2.kp, &spid2.ki, &spid2.kd);  // 恢复pid参数
 	flash_read_cycle("cycle", &ctrl_cycle); // 恢复参数
 	steer1_set_compare(1000);
 	steer2_set_compare(2000);
@@ -83,6 +88,15 @@ void loop(void)
 				printf("存储pid1参数结果：%s\r\n", ret?"成功":"失败");
 				ret = flash_write_pid("pid2", pid2.kp, pid2.ki, pid2.kd);
 				printf("存储pid2参数结果：%s\r\n", ret?"成功":"失败");
+				ret = flash_write_pid("spid1", spid1.kp, spid1.ki, spid1.kd);
+				printf("存储spid1参数结果：%s\r\n", ret?"成功":"失败");
+				ret = flash_write_pid("spid2", spid2.kp, spid2.ki, spid2.kd);
+				printf("存储spid2参数结果：%s\r\n", ret?"成功":"失败");
+				ret = flash_write_In("In", InLim, InSep);
+				printf("存储In参数结果：%s\r\n", ret?"成功":"失败");
+				ret = flash_write_cycle("cycle", ctrl_cycle);
+				printf("存储cycle参数结果：%s\r\n", ret?"成功":"失败");
+				
 				print_param();
 			}
 			//从flash加载pid参数
@@ -92,6 +106,14 @@ void loop(void)
 				printf("读取pid1参数结果：%s\r\n", ret?"成功":"失败");
 				ret = flash_read_pid("pid2", &pid2.kp, &pid2.ki, &pid2.kd); 
 				printf("读取pid2参数结果：%s\r\n", ret?"成功":"失败");
+				ret = flash_read_pid("spid1", &spid1.kp, &spid1.ki, &spid1.kd); 
+				printf("读取spid1参数结果：%s\r\n", ret?"成功":"失败");
+				ret = flash_read_pid("spid2", &spid2.kp, &spid2.ki, &spid2.kd); 
+				printf("读取spid2参数结果：%s\r\n", ret?"成功":"失败");
+				ret = flash_read_In("In", &InLim, &InSep);
+				printf("读取In参数结果：%s\r\n", ret?"成功":"失败");
+				ret = flash_read_cycle("cycle", &ctrl_cycle);
+				printf("读取cycle参数结果：%s\r\n", ret?"成功":"失败");
 				print_param();
 			}
 			//查看当前参数
@@ -108,20 +130,6 @@ void loop(void)
 //				char buf[10];
 //				uart2_read_buf((u8*)buf, len);
 //				printf("uart2缓冲区字符个数：%d\t内容：%s\r\n", uart2_buf_status(), buf);
-			}
-			//存储控制定时器周期(单位：us)参数到flash
-			else if (strcmp(command, "svcc") == 0 || strcmp(command, "savecycle") == 0)
-			{
-				u8 ret = flash_write_cycle("cycle", ctrl_cycle);
-				printf("存储cycle参数结果：%s\r\n", ret?"成功":"失败");
-				print_param();
-			}
-			//从flash加载控制定时器周期(单位：us)参数
-			else if (strcmp(command, "ldcc") == 0 || strcmp(command, "loadcycle") == 0)
-			{
-				u8 ret = flash_read_cycle("cycle", &ctrl_cycle);
-				printf("读取cycle参数结果：%s\r\n", ret?"成功":"失败");
-				print_param();
 			}
 			else if (strcmp(command, "start") == 0 || strcmp(command, "startcontrol") == 0)
 			{
@@ -169,6 +177,46 @@ void loop(void)
 			else if (strcmp(command, "kd2") == 0 || strcmp(command, "setkd2") == 0)
 			{
 				pid2.kd = parse_string(strtok(NULL, " ")).f;
+				print_param();
+			}
+			else if (strcmp(command, "skp1") == 0 || strcmp(command, "setskp1") == 0)
+			{
+				spid1.kp = parse_string(strtok(NULL, " ")).f;
+				print_param();
+			}
+			else if (strcmp(command, "ski1") == 0 || strcmp(command, "setski1") == 0)
+			{
+				spid1.ki = parse_string(strtok(NULL, " ")).f;
+				print_param();
+			}
+			else if (strcmp(command, "skd1") == 0 || strcmp(command, "setskd1") == 0)
+			{
+				spid1.kd = parse_string(strtok(NULL, " ")).f;
+				print_param();
+			}
+			else if (strcmp(command, "skp2") == 0 || strcmp(command, "setskp2") == 0)
+			{
+				spid2.kp = parse_string(strtok(NULL, " ")).f;
+				print_param();
+			}
+			else if (strcmp(command, "ski2") == 0 || strcmp(command, "setski2") == 0)
+			{
+				spid2.ki = parse_string(strtok(NULL, " ")).f;
+				print_param();
+			}
+			else if (strcmp(command, "skd2") == 0 || strcmp(command, "setskd2") == 0)
+			{
+				spid2.kd = parse_string(strtok(NULL, " ")).f;
+				print_param();
+			}
+			else if (strcmp(command, "lim") == 0 || strcmp(command, "setInLimit") == 0) // 积分限幅
+			{
+				InLim = parse_string(strtok(NULL, " ")).i;
+				print_param();
+			}
+			else if (strcmp(command, "sep") == 0 || strcmp(command, "setInSep") == 0)  // 积分分离
+			{
+				InSep = parse_string(strtok(NULL, " ")).i;
 				print_param();
 			}
 			else if (strcmp(command, "cc") == 0 || strcmp(command, "setcycle") == 0)
@@ -268,6 +316,7 @@ void loop(void)
 		{
 			delay_ms(10);
 			TIM3_Int_Stop();
+			printf("停止控制");
 		}
 
 		
@@ -287,17 +336,35 @@ void loop(void)
 void print_param(void)
 {
 	printf("当前参数：    kp1: %f\tki1: %f\tkd1: %f\tcycle: %d\t\r\n\
-              kp2: %f\tki2: %f\tkd2: %f\t目标点(%d, %d)\r\n", pid1.kp, pid1.ki, pid1.kd, ctrl_cycle, pid2.kp, pid2.ki, pid2.kd, tgt.x, tgt.y);
+              kp2: %f\tki2: %f\tkd2: %f\t目标点(%d, %d)\r\n\
+              skp1: %f\tski1: %f\tskd1: %f\tInLim: %d\r\n\
+              skp2: %f\tski2: %f\tskd2: %f\tInSep: %d\r\n", 
+				pid1.kp, pid1.ki, pid1.kd, ctrl_cycle, 
+				pid2.kp, pid2.ki, pid2.kd, tgt.x, tgt.y,
+				spid1.kp, spid1.ki, spid1.kd, InLim, 
+				spid2.kp, spid2.ki, spid2.kd, InSep);
 	char buf1[200];
 	sprintf(buf1, "pm:kp1:%f ki1:%f kd1:%f cycle:%d kp2:%f ki2:%f kd2:%f target(%d,%d)", pid1.kp, pid1.ki, pid1.kd, ctrl_cycle, pid2.kp, pid2.ki, pid2.kd, tgt.x, tgt.y);
 	
+	//将存储的参数读到临时变量中以显示
 	pid pid1, pid2;
+	pid spid1, spid2;
+	int16_t InLim, InSep;
 	u32 ctrl_cycle = 0;
 	flash_read_pid("pid1", &pid1.kp, &pid1.ki, &pid1.kd); 
 	flash_read_pid("pid2", &pid2.kp, &pid2.ki, &pid2.kd); 
+	flash_read_pid("spid1", &spid1.kp, &spid1.ki, &spid1.kd);
+	flash_read_pid("spid2", &spid2.kp, &spid2.ki, &spid2.kd);
+	flash_read_In("In", &InLim, &InSep);
 	flash_read_cycle("cycle", &ctrl_cycle);
 	printf("存储器中参数：kp1: %f\tki1: %f\tkd1: %f\tcycle: %d\r\n\
-              kp2: %f\tki2: %f\tkd2: %f\r\n",  pid1.kp, pid1.ki, pid1.kd, ctrl_cycle, pid2.kp, pid2.ki, pid2.kd);
+              kp2: %f\tki2: %f\tkd2: %f\r\n\
+              skp1: %f\tski1: %f\tskd1: %f\tInLim: %d\r\n\
+              skp2: %f\tski2: %f\tskd2: %f\tInSep: %d\r\n",  
+			  pid1.kp, pid1.ki, pid1.kd, ctrl_cycle, 
+			  pid2.kp, pid2.ki, pid2.kd,
+				spid1.kp, spid1.ki, spid1.kd, InLim,
+				spid2.kp, spid2.ki, spid2.kd, InSep);
 	char buf2[200];
 	sprintf(buf2, "%s saved_pm:kp1:%f ki1:%f kd1:%f cycle:%d kp2:%f ki2:%f kd2:%f", buf1, pid1.kp, pid1.ki, pid1.kd, ctrl_cycle, pid2.kp, pid2.ki, pid2.kd);
 	LCD_Show_Msg(buf2);
@@ -324,6 +391,7 @@ void USART2_IRQHandler(void)                	//中断服务程序
 		{
 			if (rebuf[2] == 0x01) // 数据帧
 			{
+				lobj = obj; // 记录上个观察坐标
 				memcpy(&obj,&rebuf[3], 4);
 			}
 			else  // 信息帧
@@ -336,5 +404,92 @@ void USART2_IRQHandler(void)                	//中断服务程序
 		USART_ClearFlag(USART2,USART_FLAG_RXNE);
 	}
 } 
+
+
+/* 此处写控制代码 */
+void TIM3_IRQHandler(void)
+{
+	if(TIM_GetITStatus(TIM3,TIM_IT_Update)==SET) //溢出中断
+	{
+		
+		//记录开始时间
+		u32 ctrl_start_ms = get_time_ms();
+		
+		//计算坐标误差 - 位置式pid
+		err.x = tgt.x - obj.x;
+		err.y = tgt.y - obj.y;
+		
+		//积分分离
+		if (abs(ierr.x) < InSep)
+		{
+			ierr.x += err.x;
+		}
+		else
+		{
+			ierr.x = 0;
+		}
+		if (abs(ierr.y) < InSep)
+		{
+			ierr.y += err.y;
+		}
+		else
+		{
+			ierr.y = 0;
+		}
+		
+		//积分限幅
+		ierr.x = clip(ierr.x, 0 - InLim, InLim);
+		ierr.y = clip(ierr.y, 0 - InLim, InLim);
+		
+		derr.x = err.x - lerr.x;
+		derr.y = err.y - lerr.y;
+		
+		lerr = err;
+		
+		//计算目标速度
+		stgt.x = (int) (pid1.kp * err.x + pid1.kd * derr.x + pid1.ki * ierr.x);
+		stgt.y = (int) (pid2.kp * err.y + pid2.kd * derr.y + pid2.ki * ierr.y);
+		
+		//获取当前速度
+		sobj.x = obj.x - lobj.x;
+		sobj.y = obj.y - lobj.y;
+		
+		//计算速度误差 - 增量式pid
+		serr.x = stgt.x - sobj.x;
+		serr.y = stgt.y - sobj.y;
+		
+		sierr.x = sobj.x;
+		sierr.y = sobj.y;
+		
+		sderr.x = serr.x - 2 * slerr.x + sllerr.x;
+		sderr.y = serr.y - 2 * slerr.y + sllerr.y;
+		
+		sllerr = slerr;
+		slerr = serr;
+		
+		//通过增量值设计舵机值
+		int derta_compare1 = (int) (spid1.kp * serr.x + spid1.kd * sderr.x + spid1.ki * sierr.x);
+		int derta_compare2 = (int) (spid2.kp * serr.y + spid2.kd * sderr.y + spid2.ki * sierr.y);
+		
+		steer_compare.x = clip_1500_2500(steer_compare.x + derta_compare1);
+		steer_compare.y = clip_500_1500(steer_compare.y + derta_compare2);
+		
+		steer2_set_compare(steer_compare.x); // steer2控制x方向
+		steer1_set_compare(steer_compare.y); // steer1控制y方向
+		
+		led_switch(LED1);
+				
+		
+		//记录中断处理函数所用时间
+		last_ctrl_ms = get_time_ms() - ctrl_start_ms;
+	}
+	TIM_ClearITPendingBit(TIM3,TIM_IT_Update);  //清除中断标志位
+}
+
+
+
+
+
+
 
 

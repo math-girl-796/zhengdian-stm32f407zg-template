@@ -39,8 +39,8 @@ u8 flash_read_pid(char* filename, float* kp, float* ki, float* kd);
 u8 flash_write_cycle(char* filename, u32 cycle);
 u8 flash_read_cycle(char* filename, u32* cycle);
 
-
-
+u8 flash_write_In(char* filename, int16_t InLim, int16_t InSep);
+u8 flash_read_In(char* filename, int16_t* InLim, int16_t* InSep);
 
 
 

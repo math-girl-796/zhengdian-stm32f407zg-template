@@ -219,7 +219,98 @@ u8 flash_read_cycle(char* filename, u32* cycle)
 	}
 }
 
+u8 flash_write_In(char* filename, int16_t InLim, int16_t InSep)
+{
+	//确定要读写的文件名
+	char _filename[40];
+	strcpy(_filename, "1:");
+	strcat(_filename, filename);
+	FIL *fil = (FIL*)mymalloc(SRAMIN,sizeof(FIL));
+	
+	u8 open_val;
+	//以写方式打开文件
+	//先查看文件是否存在，如果存在则打开，如果不存在则创建并打开
+	if ((open_val = f_open(fil, (const TCHAR*)_filename, 2)) !=0)
+	{
+		open_val = f_open(fil, (const TCHAR*)_filename, 7); // 创建文件，并以读写模式打开
+	}
+	
+	if(open_val != 0) return 0;
+	
+	u32 ret_len;
+	u8 buf[8];
+	byte_u32 bu;
+	
+	bu.u = InLim;
+	buf[0] = bu.bytes.b0;
+	buf[1] = bu.bytes.b1;
+	buf[2] = bu.bytes.b2;
+	buf[3] = bu.bytes.b3;
+	
+	bu.u = InSep;
+	buf[4] = bu.bytes.b0;
+	buf[5] = bu.bytes.b1;
+	buf[6] = bu.bytes.b2;
+	buf[7] = bu.bytes.b3;
+	u8 ret_val = f_write(fil, buf, 8, &ret_len);
+	
+	if (ret_val != 0) return 0;
+	
+	//关闭文件
+	f_close(fil);
+	
+	if (ret_len != 8) return 0;
+	
+	return 1;
+}
 
+
+
+u8 flash_read_In(char* filename, int16_t* InLim, int16_t* InSep)
+{
+	//确定要读写的文件名
+	char _filename[40];
+	strcpy(_filename, "1:");
+	strcat(_filename, filename);
+	FIL *fil = (FIL*)mymalloc(SRAMIN,sizeof(FIL));
+	
+	u8 open_val = 0;
+	open_val += 1; //avoid keil compiler warning
+	
+	//以读方式打开文件，如果成功返回1，如果失败返回0（失败通常是因为文件不存在）
+	if ((open_val = f_open(fil, (const TCHAR*)_filename, 1)) !=0)
+	{
+		return 0;
+	}
+	
+
+	u32 ret_len;
+	u8 buf[8];
+	
+	u8 ret_val = f_read(fil, buf, 8, &ret_len);
+	
+	if (ret_val != 0) return 0;
+	
+	byte_u32 bu;
+	
+	bu.bytes.b0 = buf[0];
+	bu.bytes.b1 = buf[1];	
+	bu.bytes.b2 = buf[2];
+	bu.bytes.b3 = buf[3];
+	*InLim = bu.u;
+	
+	bu.bytes.b0 = buf[4];
+	bu.bytes.b1 = buf[5];	
+	bu.bytes.b2 = buf[6];
+	bu.bytes.b3 = buf[7];
+	*InSep = bu.u;
+	
+	if (ret_len != 8) return 0;
+	else
+	{
+		return 1;
+	}
+}
 
 
 
